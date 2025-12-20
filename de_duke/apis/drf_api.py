@@ -34,7 +34,13 @@ class DrfApi(Construct):
         app_asset = s3_assets.Asset(
             self, "AppAsset",
             path=str(Path(__file__).parent / "drf"),
-            asset_hash=name
+            asset_hash=name,
+            exclude=[
+                "**/mediafiles",
+                "**/staticfiles",
+                "**/venv",
+                "**/.secret"
+            ]
         )
         secret = secretsmanager.Secret(
             self, "DRFSecret",
@@ -53,47 +59,33 @@ class DrfApi(Construct):
             "unzip awscliv2.zip",
             "sudo ./aws/install",
             "sudo apt install -y gdal-bin libgdal-dev",
+            # install docker and docker compose
+            "sudo apt install -y docker.io docker-compose",
             # Download the application code from S3
             f"aws s3 cp {app_asset.s3_object_url} /tmp/app.zip",
             "unzip /tmp/app.zip -d /opt/app && rm /tmp/app.zip",
+            "cd /opt/app",
             # Install dependencies
-            "mkdir -p /opt/app/pip_tmp",
-            "export TMPDIR=/opt/app/pip_tmp",
+            "mkdir -p pip_tmp",
+            "export TMPDIR=pip_tmp",
             # "pip3 install --no-cache-dir -r /opt/app/requirements.txt",
-            "pip3 install --no-cache-dir --default-timeout=100 --retries 5 -r /opt/app/requirements.txt",
-            "rm -rf /opt/app/pip_tmp",  # Clean up after installation
-            # Set up systemd service
+            "pip3 install --no-cache-dir --default-timeout=100 --retries 5 -r requirements.txt",
+            "rm -rf pip_tmp",  # Clean up after installation
+            # Save environment variables into ./backend/.env.aws file
             f"""
-            cat <<EOF > /etc/systemd/system/django.service
-            [Unit]
-            Description=Gunicorn instance to serve Django
-            After=network.target
-
-            [Service]
-            User=root
-            Group=root
-            WorkingDirectory=/opt/app
-            Environment="PATH=/usr/bin"
-            Environment="SECRET_KEY_ARN={secret.secret_arn}"
-            # ... add other env vars here ...
-            Environment="CPLUS_INCLUDE_PATH=/usr/include/gdal"
-            Environment="C_INCLUDE_PATH=/usr/include/gdal"
-            Environment="GDAL_LIBRARY_PATH=/usr/lib/libgdal.so"
-            Environment="DJANGO_SETTINGS_MODULE=main.settings.aws"
-            {"\n".join([f"Environment=\"{key}={value}\"" for key,
+            cat <<EOF > ./backend/.env.aws
+            SECRET_KEY_ARN={secret.secret_arn}
+            CPLUS_INCLUDE_PATH=/usr/include/gdal
+            C_INCLUDE_PATH=/usr/include/gdal
+            GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
+            DJANGO_SETTINGS_MODULE=main.settings.aws
+            {"\n".join([f"{key}={value}" for key,
                         value in config['shared'].default_env_vars.items()])}
-            {"\n".join([f"Environment=\"{key}={value}\"" for key,
+            {"\n".join([f"{key}={value}" for key,
                             value in config['databases'].env_vars.items()])}
-            # Run migrations
-            ExecStartPre=/usr/bin/python3 /opt/app/manage.py migrate
-            ExecStart=/usr/local/bin/gunicorn --workers 3 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 main.asgi:application
-
-            [Install]
-            WantedBy=multi-user.target
             EOF
             """,
-            "sudo systemctl start django",
-            "sudo systemctl enable django"
+            "docker compose -f compose.aws.yaml up -d",
         )
 
         asg = autoscaling.AutoScalingGroup(
