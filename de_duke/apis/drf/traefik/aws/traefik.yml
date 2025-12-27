@@ -1,0 +1,18 @@
+api:
+  dashboard: true
+  insecure: true  # For development - remove in production
+
+entryPoints:
+  web:
+    address: :80
+    forwardedHeaders:
+      # trustedIPs: ["172.31.0.0/16"]
+      insecure: true
+
+providers:
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+log:
+  level: INFO

@@ -2,6 +2,8 @@ from aws_cdk import (
     aws_ec2 as ec2,
     aws_lambda as _lambda,
     aws_secretsmanager as secretsmanager,
+    aws_route53 as route53,
+    aws_certificatemanager as acm,
     Aws,
     RemovalPolicy
 )
@@ -78,14 +80,16 @@ class Shared(Construct):
                 stage=config['stage']
             )
         ).layer
-        # self.hosted_zone = route53.HostedZone.from_lookup(
-        #     self, "HostedZone",
-        #     domain_name=""
-        # )
 
-        # self.certificate = acm.Certificate(
-        #     self, "UserInterfaceCertificate",
-        #     domain_name="",
-        #     subject_alternative_names=[],
-        #     validation=acm.CertificateValidation.from_dns(hosted_zone)
-        # )
+        self.hosted_zone = route53.HostedZone.from_lookup(
+            self, "HostedZone",
+            domain_name="de-duke.com"
+        )
+
+        self.certificate = acm.Certificate(
+            self, "Certificate",
+            domain_name="de-duke.com",
+            subject_alternative_names=["*.de-duke.com"],
+            allow_export=False,
+            validation=acm.CertificateValidation.from_dns(self.hosted_zone)
+        )

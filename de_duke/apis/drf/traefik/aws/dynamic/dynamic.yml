@@ -1,0 +1,24 @@
+http:
+  # Add the router for HTTPS
+  routers:
+    # HTTP router with redirect to HTTPS
+    backend-http:
+      entryPoints:
+        - web
+      service: backend
+      rule: Host(`api.de-duke.com`)
+    
+    # Separate router for EC2 hostname without SSL
+    backend-elb:
+      entryPoints:
+        - web
+      service: backend
+      rule: HostRegexp(`^.+\.elb\.amazonaws\.com$`)
+
+  # Add the service
+  services:
+    backend:
+      loadBalancer:
+        servers:
+          - url: http://backend:8000
+        passHostHeader: true

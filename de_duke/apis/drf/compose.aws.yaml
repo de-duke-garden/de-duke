@@ -1,0 +1,25 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.aws
+    container_name: deduke-backend-aws
+    restart: unless-stopped
+    expose:
+      - 8000
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env.aws
+  traefik:
+    image: traefik:v3.5
+    container_name: deduke-traefik-aws
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080" # Traefik dashboard (remove in production)
+    volumes:
+      - ./traefik/aws/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/aws/dynamic:/etc/traefik/dynamic:ro
+    depends_on:
+      - backend

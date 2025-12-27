@@ -5,6 +5,9 @@ from aws_cdk import (
     aws_s3_assets as s3_assets,
     aws_autoscaling as autoscaling,
     aws_secretsmanager as secretsmanager,
+    aws_elasticloadbalancingv2 as elbv2,
+    aws_route53 as route53,
+    aws_route53_targets as route53_targets,
     Aws,
     Duration,
     CfnOutput,
@@ -39,7 +42,7 @@ class DrfApi(Construct):
                 "**/mediafiles",
                 "**/staticfiles",
                 "**/venv",
-                "**/.secret"
+                "**/.secrets"
             ]
         )
         secret = secretsmanager.Secret(
@@ -53,39 +56,32 @@ class DrfApi(Construct):
 
         user_data = ec2.UserData.for_linux()
         user_data.add_commands(
-            "sudo apt update -y",
-            "sudo apt install -y python3 python3-pip unzip curl",
-            "curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
-            "unzip awscliv2.zip",
-            "sudo ./aws/install",
-            "sudo apt install -y gdal-bin libgdal-dev",
-            # install docker and docker compose
-            "sudo apt install -y docker.io docker-compose",
+            "sudo yum update -y",
+            "sudo yum install -y docker",
+            "sudo mkdir -p /usr/libexec/docker/cli-plugins",
+            "sudo curl -SL https://github.com/docker/compose/releases/download/v2.39.4/docker-compose-$(uname -s)-$(uname -m) -o /usr/libexec/docker/cli-plugins/docker-compose",
+            "sudo chmod +x /usr/libexec/docker/cli-plugins/docker-compose",
+            "sudo service docker start",
+            "sudo usermod -aG docker $USER",
             # Download the application code from S3
             f"aws s3 cp {app_asset.s3_object_url} /tmp/app.zip",
             "unzip /tmp/app.zip -d /opt/app && rm /tmp/app.zip",
             "cd /opt/app",
-            # Install dependencies
-            "mkdir -p pip_tmp",
-            "export TMPDIR=pip_tmp",
-            # "pip3 install --no-cache-dir -r /opt/app/requirements.txt",
-            "pip3 install --no-cache-dir --default-timeout=100 --retries 5 -r requirements.txt",
-            "rm -rf pip_tmp",  # Clean up after installation
             # Save environment variables into ./backend/.env.aws file
             f"""
-            cat <<EOF > ./backend/.env.aws
-            SECRET_KEY_ARN={secret.secret_arn}
-            CPLUS_INCLUDE_PATH=/usr/include/gdal
-            C_INCLUDE_PATH=/usr/include/gdal
-            GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
-            DJANGO_SETTINGS_MODULE=main.settings.aws
-            {"\n".join([f"{key}={value}" for key,
-                        value in config['shared'].default_env_vars.items()])}
-            {"\n".join([f"{key}={value}" for key,
-                            value in config['databases'].env_vars.items()])}
-            EOF
+cat <<EOF > ./backend/.env.aws
+SECRET_KEY_ARN={secret.secret_arn}
+CPLUS_INCLUDE_PATH=/usr/include/gdal
+C_INCLUDE_PATH=/usr/include/gdal
+GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
+DJANGO_SETTINGS_MODULE=main.settings.aws
+{"\n".join([f"{key}={value}" for key,
+                value in config['shared'].default_env_vars.items()])}
+{"\n".join([f"{key}={value}" for key,
+                    value in config['databases'].env_vars.items()])}
+EOF
             """,
-            "docker compose -f compose.aws.yaml up -d",
+            "sudo docker compose -f compose.aws.yaml up -d",
         )
 
         asg = autoscaling.AutoScalingGroup(
@@ -96,26 +92,77 @@ class DrfApi(Construct):
                 ec2.InstanceSize.MICRO,
             ),
             vpc=config['shared'].vpc,
-            machine_image=ec2.MachineImage.generic_linux(
-                ami_map={
-                    "af-south-1": "ami-0942f36ad098582d6"
-                }
-            ),
+            machine_image=ec2.MachineImage.latest_amazon_linux2023(),
             user_data=user_data,
             min_capacity=1,
             max_capacity=2,
             desired_capacity=1,
-            # key_name="vanguard-key",
         )
 
         asg.connections.allow_from_any_ipv4(
             ec2.Port.tcp(22), "Allow SSH Access")
+        asg.connections.allow_from_any_ipv4(
+            ec2.Port.tcp(80), "Allow HTTP Access")
+        # asg.connections.allow_from_any_ipv4(
+        #     ec2.Port.tcp(443), "Allow HTTPS Access")
+        if config['shared'].stage['name'] == "dev":
+            asg.connections.allow_from_any_ipv4(
+                ec2.Port.tcp(8080), "Allow Traefik Dashboard Access")
 
         secret.grant_read(asg)
         config['shared'].email_secret.grant_read(asg)
         config['shared'].google_map_secret.grant_read(asg)
         app_asset.grant_read(asg)
         config['databases'].grant_connect(asg)
+
+        lb = elbv2.ApplicationLoadBalancer(
+            self, "LoadBalancer",
+            vpc=config['shared'].vpc,
+            internet_facing=True,
+        )
+
+        route53.ARecord(
+            self, "ApiARecord",
+            zone=config['shared'].hosted_zone,
+            record_name="api",
+            target=route53.RecordTarget.from_alias(
+                route53_targets.LoadBalancerTarget(lb)),
+        )
+
+        listener_80 = lb.add_listener(
+            "Listener80",
+            port=80
+        )
+        listener_80.add_targets(
+            "TargetGroup80",
+            port=80,
+            targets=[asg]
+        )
+
+        listener_443 = lb.add_listener(
+            "Listener443",
+            port=443,
+            certificates=[
+                elbv2.ListenerCertificate.from_arn(
+                    config['shared'].certificate.certificate_arn)
+            ]
+        )
+        listener_443.add_targets(
+            "TargetGroup443",
+            port=80,
+            targets=[asg]
+        )
+
+        if config['shared'].stage['name'] == "dev":
+            listener_8080 = lb.add_listener(
+                "Listener8080",
+                port=8080
+            )
+            listener_8080.add_targets(
+                "TargetGroup8080",
+                port=8080,
+                targets=[asg]
+            )
 
         CfnOutput(self, "AutoScalingGroupName",
                   value=asg.auto_scaling_group_name)

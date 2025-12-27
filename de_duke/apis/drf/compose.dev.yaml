@@ -1,0 +1,54 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: deduke-backend-dev
+    restart: unless-stopped
+    expose:
+      - 8000
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env.dev
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgis/postgis:latest
+    container_name: deduke-db-dev
+    restart: always
+    user: postgres
+    secrets:
+      - db-password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres #TODO: make sure to use your prefered db name
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+    expose:
+      - 5432
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  traefik:
+    image: traefik:v3.5
+    container_name: deduke-traefik-dev
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080" # Traefik dashboard
+    volumes:
+      - ./traefik/dev/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dev/dynamic:/etc/traefik/dynamic:ro
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
+secrets:
+  db-password:
+    file: .secrets/db-password-dev.txt
