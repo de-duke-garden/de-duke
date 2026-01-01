@@ -20,7 +20,7 @@ MainStack(
     app, "DeDukeDevStack",
     stage={
         "name": "dev",
-        "version": "1.0.35",
+        "version": "1.0.0",
     },
     env=env
 )

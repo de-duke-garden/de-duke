@@ -18,6 +18,7 @@ from pathlib import Path
 from ..stage import StageNameEnum
 from ..databases.main import Databases
 from ..shared.main import Shared
+from ..agents.main import Agents
 import json
 
 
@@ -25,6 +26,7 @@ class DrfApiConfig(TypedDict):
     shared: Shared
     databases: Databases
     # authentications: Authentications
+    agents: Agents
 
 
 class DrfApi(Construct):
@@ -79,6 +81,8 @@ DJANGO_SETTINGS_MODULE=main.settings.aws
                 value in config['shared'].default_env_vars.items()])}
 {"\n".join([f"{key}={value}" for key,
                     value in config['databases'].env_vars.items()])}
+{"\n".join([f"{key}={value}" for key,
+                        value in config['agents'].env_vars.items()])}
 EOF
             """,
             "sudo docker compose -f compose.aws.yaml up -d",
@@ -114,6 +118,7 @@ EOF
         config['shared'].google_map_secret.grant_read(asg)
         app_asset.grant_read(asg)
         config['databases'].grant_connect(asg)
+        config['agents'].grant_access(asg.role)
 
         lb = elbv2.ApplicationLoadBalancer(
             self, "LoadBalancer",

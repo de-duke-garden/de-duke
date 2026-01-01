@@ -15,7 +15,7 @@ services:
       db:
         condition: service_healthy
   db:
-    image: postgis/postgis:latest
+    image: garapadev/postgres-postgis-pgvector:latest
     container_name: deduke-db-dev
     restart: always
     user: postgres
@@ -25,6 +25,7 @@ services:
       - db-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=postgres #TODO: make sure to use your prefered db name
+      - POSTGRES_PASSWORD=
       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
     expose:
       - 5432

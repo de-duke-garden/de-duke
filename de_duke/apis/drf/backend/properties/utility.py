@@ -8,6 +8,13 @@ from django.http import HttpRequest
 from django.core.handlers.wsgi import WSGIRequest
 from io import BytesIO
 import urllib.parse
+import boto3
+import os
+import logging
+import numpy as np
+
+
+logger = logging.getLogger("django")
 
 
 def encrypt_payload(payload) -> str:
@@ -19,10 +26,12 @@ def encrypt_payload(payload) -> str:
         signer = Signer()
         signed_payload = signer.sign_object(payload)
         # Base64 encode for URL safety
-        encrypted_payload = base64.urlsafe_b64encode(signed_payload.encode()).decode()
+        encrypted_payload = base64.urlsafe_b64encode(
+            signed_payload.encode()).decode()
         return encrypted_payload
     except Exception as e:
         raise ValueError(f"Failed to encrypt payload: {str(e)}")
+
 
 def decrypt_payload(encrypted_payload) -> dict | None:
     """
@@ -31,16 +40,16 @@ def decrypt_payload(encrypted_payload) -> dict | None:
     """
     try:
         # Decode from base64
-        signed_payload = base64.urlsafe_b64decode(encrypted_payload.encode()).decode()
-        
+        signed_payload = base64.urlsafe_b64decode(
+            encrypted_payload.encode()).decode()
+
         # Decrypt using Django's signing
         signer = Signer()
         payload = signer.unsign_object(signed_payload)
-        
+
         return payload
     except (BadSignature, ValueError, Exception):
         return None
-
 
 
 class JSONv2Encoder(json.JSONEncoder):
@@ -83,6 +92,33 @@ def build_request_from_scope(scope):
             environ[f'HTTP_{name}'] = value.decode()
 
     request = WSGIRequest(environ)
-    request.META['REMOTE_ADDR'] = scope.get('client')[0] if scope.get('client') else ''
+    request.META['REMOTE_ADDR'] = scope.get(
+        'client')[0] if scope.get('client') else ''
     request.user = scope.get('user', None)
     return request
+
+
+def text_to_embedding(input_text: str) -> list[float]:
+    body = json.dumps({
+        "inputText": input_text,
+        "dimensions": 1536
+    })
+
+    bedrock_runtime_client = boto3.client("bedrock-runtime")
+    embedding_model_id = os.getenv("EMBEDDING_MODEL_ID")
+
+    try:
+        response = bedrock_runtime_client.invoke_model(
+            modelId=embedding_model_id,
+            contentType='application/json',
+            accept='application/json',
+            body=body
+        )
+        response_body = response['body'].read().decode('utf-8')
+        response_json = json.loads(response_body)
+        embedding = response_json.get('embedding', np.array([]))
+        embedding = np.array(embedding).tolist()
+        return embedding
+    except Exception as e:
+        logger.exception(f"Error invoking Bedrock embedding model: {e}")
+        raise e

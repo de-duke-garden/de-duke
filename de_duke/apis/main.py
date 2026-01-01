@@ -6,11 +6,14 @@ from ..shared.main import Shared
 # from ..authentications.main import Authentications
 from ..databases.main import Databases
 from .drf_api import DrfApi
+from ..agents.main import Agents
+
 
 class ApiConfig(TypedDict):
     shared: Shared
     # authentications: Authentications
     databases: Databases
+    agents: Agents
 
 
 class Api(Construct):
