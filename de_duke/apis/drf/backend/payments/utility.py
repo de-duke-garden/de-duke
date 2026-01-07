@@ -4,11 +4,13 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 import requests
+import paystack
 
 from .models import PropertyCheckout
 
 
 User = get_user_model()
+paystack.api_key = settings.PAYSTACK_SECRET_KEY
 
 
 def create_property_flutterwave_payment_link(property_instance: Property, user: AbstractUser) -> str:
@@ -36,7 +38,7 @@ def create_property_flutterwave_payment_link(property_instance: Property, user: 
             "description": f"Payment for {property_instance.subtitle()}",
             "logo": "https://de-duke.com/static/logo.png"
         },
-        "configuration": { "session_duration": 30 },
+        "configuration": {"session_duration": 30},
         "max_retry_attempt": 5,
         "payment_options": "card, opay, banktransfer, account, applepay, googlepay, enaira",
         # "link_expiration": "2024-02-14T12:20:00",
@@ -59,6 +61,33 @@ def create_property_flutterwave_payment_link(property_instance: Property, user: 
             payment_link = response_data["data"]["link"]
             return payment_link
         else:
-            raise Exception(f"Flutterwave API error: {response_data.get('message')}")
+            raise Exception(
+                f"Flutterwave API error: {response_data.get('message')}")
     else:
-        raise Exception(f"HTTP error: {response.status_code} - {response.text}")
+        raise Exception(
+            f"HTTP error: {response.status_code} - {response.text}")
+
+
+def create_property_paystack_payment_link(property_instance: Property, user: AbstractUser) -> str:
+    """
+    Create a Paystack payment link for a property checkout session.
+    """
+    checkout = PropertyCheckout.objects.create(
+        property=property_instance,
+        user=user,
+        payment_gateway='paystack',
+        status='initiated'
+    )
+    transaction = paystack.Transaction.initialize(
+        amount=property_instance.unit_amount,
+        currency=checkout.currency,
+        email=user.email,
+        reference=checkout.id,
+        callback_url=settings.PAYSTACK_REDIRECT_URL,
+        metadata={
+            "property_id": str(property_instance.id),
+            "user_id": str(user.id),
+            # "valid_until": checkout.created_at.isoformat()
+        }
+    )
+    return transaction.data["access_code"]

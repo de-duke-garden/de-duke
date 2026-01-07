@@ -111,6 +111,13 @@ class Property(models.Model):
                 return shortlet.price
         return None
 
+    @property
+    def unit_amount(self):
+        """
+        Get the unit amount of the property based on its price.
+        """
+        return int(self.price * 100)
+
     def title(self):
         """
         Generate a title for the property based on its type and key attributes.

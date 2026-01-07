@@ -61,3 +61,4 @@ boto3
 botocore
 django-cognito-jwt
 numpy
+paystack-sdk

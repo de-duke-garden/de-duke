@@ -12,7 +12,7 @@ export default function Footer() {
                         We simplify your search with smart suggestions tailored to your needs. Based on your preferences and browsing behavior, De-Duke highlights properties you're most likely to love—saving you time and helping you make confident decisions.
                     </p>
 
-                    <div className="flex flex-wrap justify-center gap-8 md:gap-16 border-t border-b border-gray-100 py-6 text-sm text-gray-600 font-medium">
+                    {/* <div className="flex flex-wrap justify-center gap-8 md:gap-16 border-t border-b border-gray-100 py-6 text-sm text-gray-600 font-medium">
                         <div className="flex items-center cursor-pointer hover:text-primary group">
                             Real Estate
                             <svg className="w-4 h-4 ml-1 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -29,7 +29,7 @@ export default function Footer() {
                             Browse Homes
                             <svg className="w-4 h-4 ml-1 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Bottom Navigation */}
