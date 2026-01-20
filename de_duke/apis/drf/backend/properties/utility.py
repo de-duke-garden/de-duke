@@ -12,6 +12,7 @@ import boto3
 import os
 import logging
 import numpy as np
+import requests
 
 
 logger = logging.getLogger("django")
@@ -98,10 +99,10 @@ def build_request_from_scope(scope):
     return request
 
 
-def text_to_embedding(input_text: str) -> list[float]:
+def _embed_with_bedrock(input_text: str) -> list[float]:
     body = json.dumps({
         "inputText": input_text,
-        "dimensions": 1536
+        "dimensions": 512
     })
 
     bedrock_runtime_client = boto3.client("bedrock-runtime")
@@ -122,3 +123,19 @@ def text_to_embedding(input_text: str) -> list[float]:
     except Exception as e:
         logger.exception(f"Error invoking Bedrock embedding model: {e}")
         raise e
+
+
+def _embed_with_embed(input_text: str) -> list[float]:
+    try:
+        response = requests.post(
+            "http://embed:8100/embed", json={"text": input_text})
+        return response.json()
+    except Exception as e:
+        logger.exception(f"Error invoking Embedding model: {e}")
+        raise e
+
+
+def text_to_embedding(input_text: str) -> list[float]:
+    if os.getenv("DJANGO_SETTINGS_MODULE") == "de_duke.settings.aws":
+        return _embed_with_bedrock(input_text)
+    return _embed_with_embed(input_text)

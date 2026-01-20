@@ -56,7 +56,7 @@ class Property(models.Model):
         HostAccount, related_name="properties", on_delete=models.CASCADE)
     property_type = models.CharField(
         max_length=50, choices=PROPERTY_TYPE_CHOICES)
-    embedding = VectorField(dimensions=1536, null=True, blank=True)
+    embedding = VectorField(dimensions=512, null=True, blank=True)
 
     class Meta:
         verbose_name = "Property"
