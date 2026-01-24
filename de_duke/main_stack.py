@@ -18,6 +18,7 @@ class MainStack(Stack):
 
         shared = Shared(
             self, "SharedResources",
+            config={}
         )
         databases = Databases(
             self, "Databases",

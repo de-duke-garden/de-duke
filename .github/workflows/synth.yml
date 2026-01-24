@@ -1,10 +1,10 @@
-name: Deploy to AWS
+name: Synthesizer Deploy to AWS
 on:
-  push:
+  pull_request:
     branches:
       - main
 jobs:
-  deploy:
+  synth:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -38,5 +38,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install hatch
 
-      - name: Deploy CDK stack
-        run: cdk deploy --require-approval never
+      - name: Check docker status
+        run: docker info
+
+      - name: Synthesize CDK stack
+        run: cdk synth
+      
+      - name: View Tree of CDK Synth Output
+        if: failure()
+        run: tree cdk.out /F
+        

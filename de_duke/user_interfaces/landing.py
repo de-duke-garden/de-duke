@@ -12,12 +12,38 @@ from aws_cdk import (
     RemovalPolicy,
     Duration,
     CfnOutput,
+    ILocalBundling
 )
 from constructs import Construct
 from pathlib import Path
 from typing import TypedDict
 
 from ..shared.main import Shared
+
+import jsii
+import subprocess
+import shutil
+import os
+
+
+@jsii.implements(ILocalBundling)
+class MyLocalBundler:
+    def __init__(self, project_root):
+        self.project_root = project_root
+
+    def try_bundle(self, output_dir: str, options) -> bool:
+        try:
+            # 1. Install dependencies
+            subprocess.run(["npm", "install"], cwd=self.project_root, check=True)
+            # 2. Run the Next.js build
+            subprocess.run(["npm", "run", "build"], cwd=self.project_root, check=True)
+            # 3. Copy the 'out' folder contents to the CDK output directory
+            dist_dir = os.path.join(self.project_root, "out")
+            shutil.copytree(dist_dir, output_dir, dirs_exist_ok=True)
+            return True
+        except Exception as e:
+            print(f"Local bundling failed: {e}")
+            return False
 
 
 class LandingConfig(TypedDict):
@@ -36,6 +62,8 @@ class Landing(Construct):
             removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=True,
         )
+
+        project_path = str(Path(__file__).parent.joinpath("landing").resolve())
 
         # Create CloudFront distribution for the S3 bucket
         distribution = cloudfront.Distribution(
@@ -71,22 +99,15 @@ class Landing(Construct):
             self, "DeployUserInterface",
             sources=[
                 s3_deploy.Source.asset(
-                    # path=str(Path(__file__).parent.joinpath("next-app/out").resolve())
-                    path=str(Path(__file__).parent.joinpath(
-                        "landing").resolve()),
+                    path=project_path,
                     bundling=BundlingOptions(
-                        bundling_file_access=BundlingFileAccess.VOLUME_COPY,
                         image=_lambda.Runtime.NODEJS_LATEST.bundling_image,
                         command=[
                             "bash", "-c",
                             "npm install && npm run build && cp -r out/* /asset-output/"
                         ],
-                        output_type=BundlingOutput.AUTO_DISCOVER,
-                        security_opt="no-new-privileges:true",
-                        network="host",
-                        # environment={
-                        #     "NEXT_PUBLIC_API_URL": config['api'].rest_api.api_url.rstrip("/"),
-                        # },
+                        # Pass an instance of your custom class here
+                        local=MyLocalBundler(project_path)
                     ),
                     exclude=["**/node_modules/**", "**/.next/**", "**/out/**"],
                 ),
