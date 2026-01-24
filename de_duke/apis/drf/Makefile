@@ -83,35 +83,35 @@ staging-prune-all:
 # Production Targets
 prod-start:
 	@echo "Starting production containers"
-	docker compose -f compose.prod.yaml up -d
+	docker compose -f compose.aws.yaml up -d
 
 prod-stop:
 	@echo "Stopping production containers"
-	docker compose -f compose.prod.yaml down
+	docker compose -f compose.aws.yaml down
 
 prod-restart:
 	@echo "Restarting production containers"
-	docker compose -f compose.prod.yaml down && docker compose -f compose.prod.yaml up -d
+	docker compose -f compose.aws.yaml down && docker compose -f compose.aws.yaml up -d
 
 prod-build:
 	@echo "Building production containers"
-	docker compose -f compose.prod.yaml up --build -d
+	docker compose -f compose.aws.yaml up --build -d
 
 prod-logs:
 	@echo "Viewing production logs"
-	docker compose -f compose.prod.yaml logs -f
+	docker compose -f compose.aws.yaml logs -f
 
 prod-exec-backend:
 	@echo "Executing shell in production backend service"
-	docker compose -f compose.prod.yaml exec backend sh
+	docker compose -f compose.aws.yaml exec backend sh
 
 prod-exec-db:
 	@echo "Executing shell in production db service"
-	docker compose -f compose.prod.yaml exec db sh
+	docker compose -f compose.aws.yaml exec db sh
 
 prod-ps:
 	@echo "Listing running production containers"
-	docker compose -f compose.prod.yaml ps
+	docker compose -f compose.aws.yaml ps
 
 prod-prune:
 	@echo "Cleaning up unused production containers, networks, images, and volumes"

@@ -8,6 +8,7 @@ import utilities.helpers
 import utilities.idx
 from django.conf import settings
 from django.db import migrations, models
+from pgvector.django import VectorExtension
 
 
 class Migration(migrations.Migration):
@@ -20,6 +21,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        VectorExtension(),
         migrations.CreateModel(
             name='Property',
             fields=[
@@ -33,7 +35,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('property_type', models.CharField(choices=[('shortlet', 'Shortlet'), ('commercial', 'Commercial')], max_length=50)),
-                ('embedding', pgvector.django.vector.VectorField(blank=True, dimensions=1536, null=True)),
+                ('embedding', pgvector.django.vector.VectorField(blank=True, dimensions=512, null=True)),
                 ('listed_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='properties', to='accounts.hostaccount')),
             ],
             options={
