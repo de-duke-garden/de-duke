@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 
@@ -19,7 +20,7 @@ export default function Navbar() {
                     {/* Logo */}
                     <div className="shrink-0 flex items-center justify-center">
                         <Link href="/" className="flex flex-col items-center group">
-                            <svg
+                            {/* <svg
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="currentColor"
@@ -31,7 +32,9 @@ export default function Navbar() {
                                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                                 <polyline points="9 22 9 12 15 12 15 22" />
                             </svg>
-                            <span className="text-xs font-bold text-primary tracking-wide">DE-DUKE</span>
+                            <span className="text-xs font-bold text-primary tracking-wide">DE-DUKE</span> */}
+
+                            <Image src="/de-duke.png" alt="DE-DUKE" width={48} height={48} />
                         </Link>
                     </div>
 

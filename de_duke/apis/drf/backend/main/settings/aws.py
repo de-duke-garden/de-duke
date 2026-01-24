@@ -9,7 +9,8 @@ try:
     SECRET_KEY_ARN = os.environ.get("SECRET_KEY_ARN")
     if SECRET_KEY_ARN:
         client = boto3.client(
-            "secretsmanager", region_name=os.environ.get("AWS_REGION"))
+            "secretsmanager", region_name=os.environ.get("AWS_REGION")
+        )
         response = client.get_secret_value(SecretId=SECRET_KEY_ARN)
         secret_string = response.get("SecretString")
         secret_dict = json.loads(secret_string)
@@ -22,18 +23,19 @@ try:
     DATABASE_CREDENTIALS_ARN = os.environ.get("DATABASE_CREDENTIALS_ARN")
     if DATABASE_CREDENTIALS_ARN:
         client = boto3.client(
-            "secretsmanager", region_name=os.environ.get("AWS_REGION"))
+            "secretsmanager", region_name=os.environ.get("AWS_REGION")
+        )
         response = client.get_secret_value(SecretId=DATABASE_CREDENTIALS_ARN)
         secret_string = response.get("SecretString")
         secret_dict = json.loads(secret_string)
         DATABASES = {
-            'default': {
-                'ENGINE': 'django.contrib.gis.db.backends.postgis',
-                'NAME': secret_dict.get("dbname"),
-                'USER': secret_dict.get("username"),
-                'PASSWORD': secret_dict.get("password"),
-                'HOST': secret_dict.get("host"),
-                'PORT': secret_dict.get("port"),
+            "default": {
+                "ENGINE": "django.contrib.gis.db.backends.postgis",
+                "NAME": secret_dict.get("dbname"),
+                "USER": secret_dict.get("username"),
+                "PASSWORD": secret_dict.get("password"),
+                "HOST": secret_dict.get("host"),
+                "PORT": secret_dict.get("port"),
             }
         }
 except Exception as e:
@@ -44,7 +46,8 @@ try:
     EMAIL_SECRET_ARN = os.environ.get("EMAIL_SECRET_ARN")
     if EMAIL_SECRET_ARN:
         client = boto3.client(
-            "secretsmanager", region_name=os.environ.get("AWS_REGION"))
+            "secretsmanager", region_name=os.environ.get("AWS_REGION")
+        )
         response = client.get_secret_value(SecretId=EMAIL_SECRET_ARN)
         secret_string = response.get("SecretString")
         secret_dict = json.loads(secret_string)
@@ -52,7 +55,7 @@ try:
         EMAIL_PORT = secret_dict.get("port")
         EMAIL_HOST_USER = secret_dict.get("username")
         EMAIL_HOST_PASSWORD = secret_dict.get("password")
-        EMAIL_USE_TLS = secret_dict.get("tls") == 'true'
+        EMAIL_USE_TLS = secret_dict.get("tls") == "true"
         DEFAULT_FROM_EMAIL = secret_dict.get("from", "De-Duke")
 except Exception as e:
     print(f"Error retrieving email host password: {e}")
@@ -60,15 +63,17 @@ except Exception as e:
 
 # Retrieve Google Map credentials from AWS Secrets Manager
 try:
-    GOOGLE_MAP_SECRET_ARN = os.environ.get("GOOGLE_MAP_SECRET_ARN")
-    if GOOGLE_MAP_SECRET_ARN:
+    GCP_SECRET_ARN = os.environ.get("GCP_SECRET_ARN")
+    if GCP_SECRET_ARN:
         client = boto3.client(
-            "secretsmanager", region_name=os.environ.get("AWS_REGION"))
-        response = client.get_secret_value(SecretId=GOOGLE_MAP_SECRET_ARN)
+            "secretsmanager", region_name=os.environ.get("AWS_REGION")
+        )
+        response = client.get_secret_value(SecretId=GCP_SECRET_ARN)
         secret_string = response.get("SecretString")
         secret_dict = json.loads(secret_string)
-        GOOGLE_MAP_API_KEY = secret_dict.get("apikey")
-        MAP_WIDGETS["GoogleMap"]["apiKey"] = GOOGLE_MAP_API_KEY
+        GOOGLE_MAP_API_KEY = secret_dict.get("mapApiKey")
+        if "MAP_WIDGETS" in globals():
+            MAP_WIDGETS["GoogleMap"]["apiKey"] = GOOGLE_MAP_API_KEY  # noqa: F405
 except Exception as e:
     print(f"Error retrieving map API key: {e}")
 
@@ -76,11 +81,7 @@ except Exception as e:
 DEBUG = True
 
 # Allowed hosts
-ALLOWED_HOSTS = [
-    "api.de-duke.com",
-    ".compute.amazonaws.com",
-    ".elb.amazonaws.com"
-]
+ALLOWED_HOSTS = ["api.de-duke.com", ".compute.amazonaws.com", ".elb.amazonaws.com"]
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
@@ -99,17 +100,17 @@ CSRF_TRUSTED_ORIGINS = [
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # Rest Framework settings
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'django_cognito_jwt.JSONWebTokenAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "django_cognito_jwt.JSONWebTokenAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 # Cognito settings

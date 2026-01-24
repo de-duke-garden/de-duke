@@ -10,6 +10,7 @@ from .databases.main import Databases
 from .stage import StageConfig
 from typing import TypedDict
 from .agents.main import Agents
+from .user_interfaces.main import UserInterface
 
 
 class MainStackConfig(TypedDict):
@@ -45,10 +46,10 @@ class MainStack(Stack):
                 "agents": agents,
             }
         )
-        # user_interface = UserInterface(
-        #     self, "UserInterface",
-        #     config={
-        #         "shared": shared,
-        #         "api": api,
-        #     }
-        # )
+        user_interface = UserInterface(
+            self, "UserInterface",
+            config={
+                "shared": shared,
+                "api": api,
+            }
+        )

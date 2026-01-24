@@ -6,7 +6,7 @@ export default function Hero() {
             {/* Background Image with Parallax-like feel */}
             <div className="absolute inset-0 z-0">
                 <Image
-                    src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?q=80&w=3270&auto=format&fit=crop"
+                    src="/hero-bg.avif"
                     alt="Modern Real Estate"
                     fill
                     priority
