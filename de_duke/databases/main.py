@@ -60,7 +60,7 @@ class Databases(Construct):
         # )
         self.db_instance = rds.DatabaseInstance(
             self,
-            f"DeDukeDBInstance{config['shared'].stage['name']}",
+            f"DeDukeDBInstance",
             engine=rds.DatabaseInstanceEngine.postgres(
                 version=rds.PostgresEngineVersion.VER_17_5
             ),

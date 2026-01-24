@@ -4,27 +4,20 @@ from aws_cdk import (
 from constructs import Construct
 
 from .shared.main import Shared
-# from .user_interface.main import UserInterface
 from .apis.main import Api
 from .databases.main import Databases
-from .stage import StageConfig
 from typing import TypedDict
 from .agents.main import Agents
 from .user_interfaces.main import UserInterface
 
 
-class MainStackConfig(TypedDict):
-    stage: StageConfig
-
-
 class MainStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, stage: StageConfig, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         shared = Shared(
             self, "SharedResources",
-            config={"stage": stage}
         )
         databases = Databases(
             self, "Databases",
