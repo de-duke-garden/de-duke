@@ -56,6 +56,7 @@ class DrfApi(Construct):
         user_data.add_commands(
             "sudo yum update -y",
             "sudo yum install -y docker",
+            "sudo yum install -y make",
             "sudo mkdir -p /usr/libexec/docker/cli-plugins",
             "sudo curl -SL https://github.com/docker/compose/releases/download/v2.39.4/docker-compose-$(uname -s)-$(uname -m) -o /usr/libexec/docker/cli-plugins/docker-compose",
             "sudo chmod +x /usr/libexec/docker/cli-plugins/docker-compose",
@@ -81,7 +82,8 @@ DJANGO_SETTINGS_MODULE=main.settings.aws
                         value in config['agents'].env_vars.items()])}
 EOF
             """,
-            "sudo docker compose -f compose.aws.yaml up -d",
+            # "sudo docker compose -f compose.aws.yaml up -d",
+            "sudo make prod-start"
         )
 
         asg = autoscaling.AutoScalingGroup(
