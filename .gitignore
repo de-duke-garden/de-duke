@@ -106,11 +106,13 @@ yarn-error.log*
 # ================================
 # Environment Variables
 # ================================
-.env
-.env*.local
-.env.development.local
-.env.test.local
-.env.production.local
+**/.env
+**/.env*.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+**/.env.dev
+**/.env.staging
 
 # ================================
 # TypeScript
@@ -195,6 +197,6 @@ secrets/
 .cdk.staging
 
 # Python SDK internal build artifacts
-portfolio/shared/layers/python_sdk/internal/dist/
-portfolio/shared/layers/python_sdk/internal/build/
-portfolio/shared/layers/python_sdk/internal/*.egg-info/
+**/shared/layers/python_sdk/internal/dist/
+**/shared/layers/python_sdk/internal/build/
+**/shared/layers/python_sdk/internal/*.egg-info/

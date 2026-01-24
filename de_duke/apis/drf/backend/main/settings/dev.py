@@ -285,11 +285,11 @@ FRONTEND_VERIFY_EMAIL_URL = os.getenv(
     "FRONTEND_VERIFY_EMAIL_URL", "http://localhost:3000/verify-email")
 
 # Firebase settings
-FIREBASE_CRED_DIR = BASE_DIR
+# FIREBASE_CRED_DIR = BASE_DIR
 # if not FIREBASE_CRED_DIR.exists():
 #     FIREBASE_CRED_DIR.mkdir()
 
-FIREBASE_CRED_FILE = os.getenv("FIREBASE_CRED_FILE")
+# FIREBASE_CRED_FILE = os.getenv("FIREBASE_CRED_FILE")
 
 # GDAL settings
 GDAL_LIBRARY_PATH = os.getenv(
