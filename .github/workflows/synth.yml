@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -40,3 +40,8 @@ jobs:
 
       - name: Synthesize CDK stack
         run: cdk synth
+      
+      - name: View Tree of CDK Synth Output
+        if: failure()
+        run: tree cdk.out /F
+        
