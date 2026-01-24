@@ -44,4 +44,7 @@ jobs:
       - name: View Tree of CDK Synth Output
         if: failure()
         run: tree cdk.out /F
+      
+      - name: Check docker status
+        run: docker info
         
