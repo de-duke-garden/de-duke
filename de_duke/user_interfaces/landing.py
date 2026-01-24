@@ -79,7 +79,7 @@ class Landing(Construct):
                         image=_lambda.Runtime.NODEJS_LATEST.bundling_image,
                         command=[
                             "bash", "-c",
-                            "npm install && npm run build && cp -r out/* /asset-output/"
+                            "npm ci && npm run build && cp -r out/* /asset-output/"
                         ],
                         output_type=BundlingOutput.AUTO_DISCOVER,
                         security_opt="no-new-privileges:true",
