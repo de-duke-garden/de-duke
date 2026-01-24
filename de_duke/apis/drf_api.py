@@ -104,7 +104,7 @@ EOF
             ec2.Port.tcp(80), "Allow HTTP Access")
         secret.grant_read(asg)
         config['shared'].email_secret.grant_read(asg)
-        config['shared'].google_map_secret.grant_read(asg)
+        config['shared'].gcp_secret.grant_read(asg)
         app_asset.grant_read(asg)
         config['databases'].grant_connect(asg)
         config['agents'].grant_access(asg.role)
