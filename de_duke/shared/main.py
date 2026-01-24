@@ -11,17 +11,18 @@ from constructs import Construct
 from ..layer import Layer, LayerConfig
 from typing import TypedDict
 from pathlib import Path
-from ..stage import StageConfig
 import json
 
 
 class SharedConfig(TypedDict):
-    stage: StageConfig
+    pass
 
 
 class Shared(Construct):
     def __init__(self, scope: Construct, id: str, config: SharedConfig) -> None:
         super().__init__(scope, id)
+        
+        self.domain_name = "de-duke.com"
 
         # NOTE: Make sure to create these secrets in AWS Secrets Manager
         # DeDukeEmail (Email Secret)
@@ -45,7 +46,7 @@ class Shared(Construct):
             "POWERTOOLS_DEV": "true",
             "POWERTOOLS_TRACE_DISABLED": "true",
             "POWERTOOLS_LOGGER_LOG_EVENT": "true",
-            "POWERTOOLS_SERVICE_NAME": f"{Aws.STACK_NAME}-service-{config['stage']['name']}",
+            "POWERTOOLS_SERVICE_NAME": f"{Aws.STACK_NAME}-service",
             "EMAIL_SECRET_ARN": self.email_secret.secret_arn,
             "GCP_SECRET_ARN": self.gcp_secret.secret_arn,
             "AWS_REGION": Aws.REGION,
@@ -55,7 +56,6 @@ class Shared(Construct):
         self.vpc.add_gateway_endpoint(
             "S3GatewayEndpoint", service=ec2.GatewayVpcEndpointAwsService.S3
         )
-        self.stage = config["stage"]
         self.powertools_layer = _lambda.LayerVersion.from_layer_version_arn(
             self,
             "PowertoolsLayer",
@@ -70,7 +70,6 @@ class Shared(Construct):
                 path=str(Path(__file__).parent.joinpath("layers/common").resolve()),
                 auto_upgrade=True,
                 layer_type="txt",
-                stage=config["stage"],
             ),
         ).layer
         self.internal_layer = Layer(
@@ -86,11 +85,8 @@ class Shared(Construct):
                 ),
                 auto_upgrade=True,
                 layer_type="toml",
-                stage=config["stage"],
             ),
         ).layer
-
-        self.domain_name = "de-duke.com"
 
         self.hosted_zone = route53.HostedZone.from_lookup(
             self, "HostedZone", domain_name=self.domain_name

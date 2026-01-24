@@ -15,7 +15,6 @@ from aws_cdk import (
 from constructs import Construct
 from typing import TypedDict
 from pathlib import Path
-from ..stage import StageNameEnum
 from ..databases.main import Databases
 from ..shared.main import Shared
 from ..agents.main import Agents
@@ -33,13 +32,10 @@ class DrfApi(Construct):
     def __init__(self, scope: Construct, id: str, config: DrfApiConfig) -> None:
         super().__init__(scope, id)
 
-        name = f"drf-{config['shared'].stage['name']}-{config['shared'].stage['version']}"
-
         # Define application code as an s3 asset
         app_asset = s3_assets.Asset(
             self, "AppAsset",
             path=str(Path(__file__).parent / "drf"),
-            asset_hash=name,
             exclude=[
                 "**/mediafiles",
                 "**/staticfiles",
@@ -90,7 +86,6 @@ EOF
 
         asg = autoscaling.AutoScalingGroup(
             self, "AutoScalingGroup",
-            auto_scaling_group_name=name,
             instance_type=ec2.InstanceType.of(
                 ec2.InstanceClass.T3,
                 ec2.InstanceSize.MICRO,
@@ -107,12 +102,6 @@ EOF
             ec2.Port.tcp(22), "Allow SSH Access")
         asg.connections.allow_from_any_ipv4(
             ec2.Port.tcp(80), "Allow HTTP Access")
-        # asg.connections.allow_from_any_ipv4(
-        #     ec2.Port.tcp(443), "Allow HTTPS Access")
-        if config['shared'].stage['name'] == "dev":
-            asg.connections.allow_from_any_ipv4(
-                ec2.Port.tcp(8080), "Allow Traefik Dashboard Access")
-
         secret.grant_read(asg)
         config['shared'].email_secret.grant_read(asg)
         config['shared'].google_map_secret.grant_read(asg)
@@ -154,20 +143,9 @@ EOF
         )
         listener_443.add_targets(
             "TargetGroup443",
-            port=80,
+            port=80, # SSL termination at the load balancer
             targets=[asg]
         )
-
-        if config['shared'].stage['name'] == "dev":
-            listener_8080 = lb.add_listener(
-                "Listener8080",
-                port=8080
-            )
-            listener_8080.add_targets(
-                "TargetGroup8080",
-                port=8080,
-                targets=[asg]
-            )
 
         CfnOutput(self, "AutoScalingGroupName",
                   value=asg.auto_scaling_group_name)

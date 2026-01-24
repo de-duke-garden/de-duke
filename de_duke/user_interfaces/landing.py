@@ -85,7 +85,6 @@ class Landing(Construct):
                         security_opt="no-new-privileges:true",
                         network="host",
                         # environment={
-                        #     "NODE_ENV": "production" if config['shared'].stage['name'] == "prod" else "test",
                         #     "NEXT_PUBLIC_API_URL": config['api'].rest_api.api_url.rstrip("/"),
                         # },
                     ),

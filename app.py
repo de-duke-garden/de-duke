@@ -20,11 +20,7 @@ env = cdk.Environment(
 app = cdk.App()
 MainStack(
     app,
-    "DeDukeDevStack",
-    stage={
-        "name": "dev",
-        "version": "1.0.1",
-    },
+    "DeDukeStack",
     env=env,
 )
 

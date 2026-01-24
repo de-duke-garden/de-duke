@@ -8,7 +8,6 @@ from aws_cdk import (
 )
 from constructs import Construct
 from typing import TypedDict, Literal
-from ..stage import StageConfig
 
 
 class LayerConfig(TypedDict):
@@ -17,7 +16,6 @@ class LayerConfig(TypedDict):
     path: str
     auto_upgrade: bool
     layer_type: Literal["toml", "txt"] = "txt"
-    stage: StageConfig
 
 
 class Layer(Construct):
@@ -53,7 +51,6 @@ class Layer(Construct):
                 security_opt="no-new-privileges:true",
                 network="host"
             ),
-            asset_hash=f"{path}-{config['stage']['name']}-{config['stage']['version']}"
         )
         layer = _lambda.LayerVersion(
             self, "Layer",
