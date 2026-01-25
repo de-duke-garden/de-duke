@@ -34,22 +34,19 @@ class DrfApi(Construct):
 
         # Define application code as an s3 asset
         app_asset = s3_assets.Asset(
-            self, "AppAsset",
+            self,
+            "AppAsset",
             path=str(Path(__file__).parent / "drf"),
-            exclude=[
-                "**/mediafiles",
-                "**/staticfiles",
-                "**/venv",
-                "**/.secrets"
-            ]
+            exclude=["**/mediafiles", "**/staticfiles", "**/venv", "**/.secrets"],
         )
         secret = secretsmanager.Secret(
-            self, "DRFSecret",
+            self,
+            "DRFSecret",
             generate_secret_string=secretsmanager.SecretStringGenerator(
                 secret_string_template=json.dumps({}),
                 generate_string_key="secretkey",
-                exclude_characters="!@#$%^&*()_+"
-            )
+                exclude_characters="!@#$%^&*()_+",
+            ),
         )
 
         user_data = ec2.UserData.for_linux()
@@ -57,6 +54,7 @@ class DrfApi(Construct):
             "sudo yum update -y",
             "sudo yum install -y docker",
             "sudo yum install -y make",
+            "sudo yum install -y git",  # remove later
             "sudo mkdir -p /usr/libexec/docker/cli-plugins",
             "sudo curl -SL https://github.com/docker/compose/releases/download/v2.39.4/docker-compose-$(uname -s)-$(uname -m) -o /usr/libexec/docker/cli-plugins/docker-compose",
             "sudo chmod +x /usr/libexec/docker/cli-plugins/docker-compose",
@@ -74,25 +72,30 @@ CPLUS_INCLUDE_PATH=/usr/include/gdal
 C_INCLUDE_PATH=/usr/include/gdal
 GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
 DJANGO_SETTINGS_MODULE=main.settings.aws
-{"\n".join([f"{key}={value}" for key,
-                value in config['shared'].default_env_vars.items()])}
-{"\n".join([f"{key}={value}" for key,
-                    value in config['databases'].env_vars.items()])}
-{"\n".join([f"{key}={value}" for key,
-                        value in config['agents'].env_vars.items()])}
+{
+                "\n".join(
+                    [
+                        f"{key}={value}"
+                        for key, value in config["shared"].default_env_vars.items()
+                    ]
+                )
+            }
+{"\n".join([f"{key}={value}" for key, value in config["databases"].env_vars.items()])}
+{"\n".join([f"{key}={value}" for key, value in config["agents"].env_vars.items()])}
 EOF
             """,
             # "sudo docker compose -f compose.aws.yaml up -d",
-            "sudo make prod-start"
+            "sudo make prod-start",
         )
 
         asg = autoscaling.AutoScalingGroup(
-            self, "AutoScalingGroup",
+            self,
+            "AutoScalingGroup",
             instance_type=ec2.InstanceType.of(
                 ec2.InstanceClass.T3,
                 ec2.InstanceSize.MICRO,
             ),
-            vpc=config['shared'].vpc,
+            vpc=config["shared"].vpc,
             machine_image=ec2.MachineImage.latest_amazon_linux2023(),
             update_policy=autoscaling.UpdatePolicy.replacing_update(),
             user_data=user_data,
@@ -101,54 +104,48 @@ EOF
             desired_capacity=1,
         )
 
-        asg.connections.allow_from_any_ipv4(
-            ec2.Port.tcp(22), "Allow SSH Access")
-        asg.connections.allow_from_any_ipv4(
-            ec2.Port.tcp(80), "Allow HTTP Access")
+        asg.connections.allow_from_any_ipv4(ec2.Port.tcp(22), "Allow SSH Access")
+        asg.connections.allow_from_any_ipv4(ec2.Port.tcp(80), "Allow HTTP Access")
         secret.grant_read(asg)
-        config['shared'].email_secret.grant_read(asg)
-        config['shared'].gcp_secret.grant_read(asg)
+        config["shared"].email_secret.grant_read(asg)
+        config["shared"].gcp_secret.grant_read(asg)
         app_asset.grant_read(asg)
-        config['databases'].grant_connect(asg)
-        config['agents'].grant_access(asg.role)
+        config["databases"].grant_connect(asg)
+        config["agents"].grant_access(asg.role)
 
         lb = elbv2.ApplicationLoadBalancer(
-            self, "LoadBalancer",
-            vpc=config['shared'].vpc,
+            self,
+            "LoadBalancer",
+            vpc=config["shared"].vpc,
             internet_facing=True,
         )
 
         route53.ARecord(
-            self, "ApiARecord",
-            zone=config['shared'].hosted_zone,
+            self,
+            "ApiARecord",
+            zone=config["shared"].hosted_zone,
             record_name="api",
             target=route53.RecordTarget.from_alias(
-                route53_targets.LoadBalancerTarget(lb)),
+                route53_targets.LoadBalancerTarget(lb)
+            ),
         )
 
-        listener_80 = lb.add_listener(
-            "Listener80",
-            port=80
-        )
-        listener_80.add_targets(
-            "TargetGroup80",
-            port=80,
-            targets=[asg]
-        )
+        listener_80 = lb.add_listener("Listener80", port=80)
+        listener_80.add_targets("TargetGroup80", port=80, targets=[asg])
 
         listener_443 = lb.add_listener(
             "Listener443",
             port=443,
             certificates=[
                 elbv2.ListenerCertificate.from_arn(
-                    config['shared'].certificate.certificate_arn)
-            ]
+                    config["shared"].certificate.certificate_arn
+                )
+            ],
         )
         listener_443.add_targets(
             "TargetGroup443",
-            port=80, # SSL termination at the load balancer
-            targets=[asg]
+            port=80,  # SSL termination at the load balancer
+            targets=[asg],
         )
 
-        CfnOutput(self, "AutoScalingGroupName",
-                  value=asg.auto_scaling_group_name)
+        CfnOutput(self, "AutoScalingGroupName", value=asg.auto_scaling_group_name)
