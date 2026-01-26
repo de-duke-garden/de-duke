@@ -59,6 +59,7 @@ drf-spectacular
 uvicorn[standard]
 boto3
 botocore
+django-storages
 django-cognito-jwt
 numpy
 paystack-sdk
