@@ -8,6 +8,7 @@ from aws_cdk import (
     aws_elasticloadbalancingv2 as elbv2,
     aws_route53 as route53,
     aws_route53_targets as route53_targets,
+    aws_s3 as s3,
     Aws,
     Duration,
     CfnOutput,
@@ -48,6 +49,10 @@ class DrfApi(Construct):
                 exclude_characters="!@#$%^&*()_+",
             ),
         )
+        media_storage = s3.Bucket(
+            self,
+            "MediaStorage"
+        )
 
         user_data = ec2.UserData.for_linux()
         user_data.add_commands(
@@ -72,6 +77,7 @@ CPLUS_INCLUDE_PATH=/usr/include/gdal
 C_INCLUDE_PATH=/usr/include/gdal
 GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
 DJANGO_SETTINGS_MODULE=main.settings.aws
+MEDIA_STORAGE_BUCKET_NAME={media_storage.bucket_name}
 {
                 "\n".join(
                     [

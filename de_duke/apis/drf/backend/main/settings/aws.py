@@ -18,6 +18,16 @@ try:
 except Exception as e:
     print(f"Error retrieving SECRET_KEY: {e}")
 
+INSTALLED_APPS += [
+    "storages",
+]
+
+MEDIA_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_STORAGE_BUCKET_NAME")
+STORAGE_REGION = os.environ.get("AWS_REGION")
+
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+MEDIA_URL = f"https://{MEDIA_STORAGE_BUCKET_NAME}.s3.{STORAGE_REGION}://"
+
 # Retrieve database credentials from AWS Secrets Manager
 try:
     DATABASE_CREDENTIALS_ARN = os.environ.get("DATABASE_CREDENTIALS_ARN")
