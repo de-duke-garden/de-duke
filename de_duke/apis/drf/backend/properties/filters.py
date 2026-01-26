@@ -1,6 +1,8 @@
 from django_filters import rest_framework as filters
 from django.db.models import F, Count, Q
 from . import models
+from pgvector.distance import CosineDistance
+from .utility import text_to_embedding
 
 
 class PropertyFilter(filters.FilterSet):
@@ -70,7 +72,11 @@ class PropertyFilter(filters.FilterSet):
             return queryset
         
         # Use icontains for case-insensitive search
-        return queryset.filter(
-            Q(description__icontains=value) |
-            Q(address__icontains=value)
-        )
+        # return queryset.filter(
+        #     Q(description__icontains=value) |
+        #     Q(address__icontains=value)
+        # )
+        query_vector = text_to_embedding(value)
+        return queryset.alias(
+            distance=CosineDistance("embedding", query_vector)
+        ).filter(distance_lt=5)

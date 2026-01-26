@@ -94,7 +94,8 @@ class CommercialPropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.CommercialProperty
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['embedding']
         read_only_fields = ['id', 'last_checked', 'property_type', 'listed_by']
     
     def create(self, validated_data):
@@ -144,7 +145,8 @@ class ShortletPropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ShortletProperty
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['embedding']
         read_only_fields = ['id', 'last_checked', 'property_type', 'listed_by']
     
     def create(self, validated_data):

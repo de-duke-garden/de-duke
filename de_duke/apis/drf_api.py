@@ -27,6 +27,7 @@ class DrfApiConfig(TypedDict):
     databases: Databases
     # authentications: Authentications
     agents: Agents
+    version: int
 
 
 class DrfApi(Construct):
@@ -97,6 +98,7 @@ EOF
         asg = autoscaling.AutoScalingGroup(
             self,
             "AutoScalingGroup",
+            auto_scaling_group_name=f"DrfApiASG-v{config['version']}",
             instance_type=ec2.InstanceType.of(
                 ec2.InstanceClass.T3,
                 ec2.InstanceSize.MICRO,

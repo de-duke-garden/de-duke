@@ -22,5 +22,8 @@ class Api(Construct):
 
         self.drf_api = DrfApi(
             self, "DrfApi",
-            config=config
+            config={
+                **config,
+                "version": 1,
+            }
         )
