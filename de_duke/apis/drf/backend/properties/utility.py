@@ -138,7 +138,9 @@ def _embed_with_embed(input_text: str) -> list[float]:
 
 
 def _embed_with_gemini(input_text: str) -> list[float]:
-    client = genai.Client()
+    client = genai.Client(
+        api_key=os.getenv("GEMINI_API_KEY")
+    )
     result = client.models.embed_content(
         model="gemini-embedding-001",
         contents=input_text,
