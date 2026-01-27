@@ -136,6 +136,6 @@ def _embed_with_embed(input_text: str) -> list[float]:
 
 
 def text_to_embedding(input_text: str) -> list[float]:
-    if os.getenv("DJANGO_SETTINGS_MODULE") == "de_duke.settings.aws":
+    if os.getenv("DJANGO_SETTINGS_MODULE") == "main.settings.aws":
         return _embed_with_bedrock(input_text)
     return _embed_with_embed(input_text)
