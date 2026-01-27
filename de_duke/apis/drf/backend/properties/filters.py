@@ -1,7 +1,7 @@
 from django_filters import rest_framework as filters
 from django.db.models import F, Count, Q
 from . import models
-from pgvector.distance import CosineDistance
+from pgvector.django import CosineDistance
 from .utility import text_to_embedding
 
 
