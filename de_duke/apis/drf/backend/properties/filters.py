@@ -79,4 +79,4 @@ class PropertyFilter(filters.FilterSet):
         query_vector = text_to_embedding(value)
         return queryset.alias(
             distance=CosineDistance("embedding", query_vector)
-        ).filter(distance_lt=5)
+        ).filter(distance__lt=5)
