@@ -104,9 +104,9 @@ def _embed_with_bedrock(input_text: str) -> list[float]:
         "inputText": input_text,
         "dimensions": 512
     })
-
-    bedrock_runtime_client = boto3.client("bedrock-runtime")
+    region = os.getenv("AWS_REGION")
     embedding_model_id = os.getenv("EMBEDDING_MODEL_ID")
+    bedrock_runtime_client = boto3.client("bedrock-runtime", region_name=region)
 
     try:
         response = bedrock_runtime_client.invoke_model(
