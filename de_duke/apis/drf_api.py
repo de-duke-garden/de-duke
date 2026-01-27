@@ -20,6 +20,8 @@ from ..databases.main import Databases
 from ..shared.main import Shared
 from ..agents.main import Agents
 import json
+import random
+import string
 
 
 class DrfApiConfig(TypedDict):
@@ -27,7 +29,6 @@ class DrfApiConfig(TypedDict):
     databases: Databases
     # authentications: Authentications
     agents: Agents
-    version: int
 
 
 class DrfApi(Construct):
@@ -98,7 +99,7 @@ EOF
         asg = autoscaling.AutoScalingGroup(
             self,
             "AutoScalingGroup",
-            auto_scaling_group_name=f"DrfApiASG-v{config['version']}",
+            auto_scaling_group_name=f"DrfApiASG-{''.join(random.choices(string.ascii_lowercase + string.digits, k=4))}",
             instance_type=ec2.InstanceType.of(
                 ec2.InstanceClass.T3,
                 ec2.InstanceSize.MICRO,
