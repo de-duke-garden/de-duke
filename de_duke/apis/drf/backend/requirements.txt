@@ -63,3 +63,4 @@ django-storages
 django-cognito-jwt
 numpy
 paystack-sdk
+google-genai

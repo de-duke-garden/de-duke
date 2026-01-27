@@ -13,6 +13,8 @@ import os
 import logging
 import numpy as np
 import requests
+from google import genai
+from google.genai import types
 
 
 logger = logging.getLogger("django")
@@ -135,8 +137,18 @@ def _embed_with_embed(input_text: str) -> list[float]:
         raise e
 
 
+def _embed_with_gemini(input_text: str) -> list[float]:
+    client = genai.Client()
+    result = client.models.embed_content(
+        model="gemini-embedding-001",
+        contents=input_text,
+        config=types.EmbedContentConfig(output_dimensionality=512),
+    )
+    [embedding_obj] = result.embeddings
+    return embedding_obj.values
+
+
 def text_to_embedding(input_text: str) -> list[float]:
-    # wILL BE USED WHEN AWS BEDROCK IS READY
-    # if os.getenv("DJANGO_SETTINGS_MODULE") == "main.settings.aws":
-    #     return _embed_with_bedrock(input_text)
+    if os.getenv("DJANGO_SETTINGS_MODULE") == "main.settings.aws":
+        return _embed_with_gemini(input_text)
     return _embed_with_embed(input_text)
