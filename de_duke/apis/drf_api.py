@@ -99,7 +99,7 @@ EOF
         asg = autoscaling.AutoScalingGroup(
             self,
             "AutoScalingGroup",
-            auto_scaling_group_name=f"DrfApiASG-{''.join(random.choices(string.ascii_lowercase + string.digits, k=4))}",
+            auto_scaling_group_name=f"DrfApiASG-{app_asset.asset_hash[:8]}",
             instance_type=ec2.InstanceType.of(
                 ec2.InstanceClass.T3,
                 ec2.InstanceSize.MICRO,
