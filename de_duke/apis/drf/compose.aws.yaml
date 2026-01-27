@@ -23,17 +23,3 @@ services:
       - ./traefik/aws/dynamic:/etc/traefik/dynamic:ro
     depends_on:
       - backend
-  embed: # will be removed later when aws bedrock is ready
-    build:
-      context: ./embed
-      dockerfile: Dockerfile.dev
-    container_name: deduke-embed-dev
-    restart: unless-stopped
-    expose:
-      - 8100
-    volumes:
-      - ./embed:/app
-    env_file:
-      - ./backend/.env.aws
-    depends_on:
-      - backend

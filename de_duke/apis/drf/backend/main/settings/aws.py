@@ -82,6 +82,7 @@ try:
         secret_string = response.get("SecretString")
         secret_dict = json.loads(secret_string)
         GOOGLE_MAP_API_KEY = secret_dict.get("mapApiKey")
+        GEMINI_API_KEY = secret_dict.get("geminiApiKey")
         if "MAP_WIDGETS" in globals():
             MAP_WIDGETS["GoogleMap"]["apiKey"] = GOOGLE_MAP_API_KEY  # noqa: F405
 except Exception as e:
