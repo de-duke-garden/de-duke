@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'nested_admin',
     'mapwidgets',
+    'rest_framework_gis',
     # Platform packages
     'django.contrib.admin',
     'django.contrib.auth',
@@ -338,3 +339,6 @@ PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY")
 PAYSTACK_WEBHOOK_SECRET = os.getenv("PAYSTACK_WEBHOOK_SECRET")
 PAYSTACK_REDIRECT_URL = os.getenv("PAYSTACK_REDIRECT_URL")
+
+# Gemini settings
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

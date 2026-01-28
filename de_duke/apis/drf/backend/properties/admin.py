@@ -125,7 +125,7 @@ class PropertyAdminProxy:
     #     return False  # Deny add permission if no HostAccount
 
     def get_exclude(self, request, obj=None):
-        exclude = ['property_type']
+        exclude = ['property_type', 'embedding']
         # if obj is None:
         #     exclude.extend(['address', 'listed_by'])
         return exclude

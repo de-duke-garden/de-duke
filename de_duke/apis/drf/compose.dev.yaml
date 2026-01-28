@@ -5,8 +5,10 @@ services:
       dockerfile: Dockerfile.dev
     container_name: deduke-backend-dev
     restart: unless-stopped
-    expose:
-      - 8000
+    # expose:
+    #   - 8000
+    ports:
+      - "8000:8000"
     volumes:
       - ./backend:/app
     env_file:
@@ -48,20 +50,20 @@ services:
     depends_on:
       - backend
 
-  embed:
-    build:
-      context: ./embed
-      dockerfile: Dockerfile.dev
-    container_name: deduke-embed-dev
-    restart: unless-stopped
-    expose:
-      - 8100
-    volumes:
-      - ./embed:/app
-    env_file:
-      - ./embed/.env.dev
-    depends_on:
-      - backend
+  # embed:
+  #   build:
+  #     context: ./embed
+  #     dockerfile: Dockerfile.dev
+  #   container_name: deduke-embed-dev
+  #   restart: unless-stopped
+  #   expose:
+  #     - 8100
+  #   volumes:
+  #     - ./embed:/app
+  #   env_file:
+  #     - ./embed/.env.dev
+  #   depends_on:
+  #     - backend
 
 volumes:
   db-data:
