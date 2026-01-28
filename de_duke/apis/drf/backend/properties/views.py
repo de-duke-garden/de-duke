@@ -10,6 +10,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from django.utils import timezone
+from rest_framework_gis.filters import DistanceToPointFilter
 
 
 from .utility import encrypt_payload
@@ -30,8 +31,9 @@ class PropertyViewSet(
     """
     permission_classes = [permissions.AllowAny]
     serializer_class = serializers.PropertySerializer
-    filter_backends = (rest_filters.DjangoFilterBackend,)
+    filter_backends = (rest_filters.DjangoFilterBackend, DistanceToPointFilter)
     filterset_class = filters.PropertyFilter
+    distance_filter_field = 'location'
 
     def get_queryset(self):
         """

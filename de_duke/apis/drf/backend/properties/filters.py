@@ -10,8 +10,8 @@ class PropertyFilter(filters.FilterSet):
     Custom filter set for properties.
     This filter set allows filtering properties based on various criteria.
     """
-    commercialproperty__total_rooms = filters.RangeFilter(method='filter_rooms')
-    commercialproperty__total_bathrooms = filters.RangeFilter(method='filter_bathrooms')
+    # commercialproperty__total_rooms = filters.RangeFilter(method='filter_rooms')
+    # commercialproperty__total_bathrooms = filters.RangeFilter(method='filter_bathrooms')
     search = filters.CharFilter(
         field_name='search',
         method='filter_search',
@@ -22,16 +22,16 @@ class PropertyFilter(filters.FilterSet):
     class Meta:
         model = models.Property
         fields = {
-            'property_type': ['exact'],
-            'created_at': ['gte', 'lte'],
-            'updated_at': ['gte', 'lte'],
-            'commercialproperty__price': ['gte', 'lte'],
-            'commercialproperty__commercial_type': ['exact', 'in'],
-            'commercialproperty__listing_type': ['exact', 'in'],
-            'commercialproperty__architectural_style': ['exact', 'in'],
-            'commercialproperty__property_condition': ['exact', 'in'],
-            'shortletproperty__price': ['gte', 'lte'],
-            'shortletproperty__shortlet_type': ['exact', 'in'],
+            # 'property_type': ['exact'],
+            # 'created_at': ['gte', 'lte'],
+            # 'updated_at': ['gte', 'lte'],
+            # 'commercialproperty__price': ['gte', 'lte'],
+            # 'commercialproperty__commercial_type': ['exact', 'in'],
+            # 'commercialproperty__listing_type': ['exact', 'in'],
+            # 'commercialproperty__architectural_style': ['exact', 'in'],
+            # 'commercialproperty__property_condition': ['exact', 'in'],
+            # 'shortletproperty__price': ['gte', 'lte'],
+            # 'shortletproperty__shortlet_type': ['exact', 'in'],
         }
     
     def filter_rooms(self, queryset, name, value):
@@ -79,4 +79,4 @@ class PropertyFilter(filters.FilterSet):
         query_vector = text_to_embedding(value)
         return queryset.alias(
             distance=CosineDistance("embedding", query_vector)
-        ).filter(distance__lt=5)
+        ).filter(distance__lt=0.5).order_by("distance")

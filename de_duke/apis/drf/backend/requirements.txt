@@ -64,3 +64,4 @@ django-cognito-jwt
 numpy
 paystack-sdk
 google-genai
+djangorestframework-gis
