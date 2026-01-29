@@ -22,11 +22,22 @@ INSTALLED_APPS += [
     "storages",
 ]
 
-MEDIA_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_STORAGE_BUCKET_NAME")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_STORAGE_BUCKET_NAME")
 STORAGE_REGION = os.environ.get("AWS_REGION")
 
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-MEDIA_URL = f"https://{MEDIA_STORAGE_BUCKET_NAME}.s3.{STORAGE_REGION}://"
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "access_key": os.environ.get("AWS_ACCESS_KEY_ID"),
+            "secret_key": os.environ.get("AWS_SECRET_ACCESS_KEY"),
+            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            "region_name": STORAGE_REGION,
+        },
+    },
+}
+MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{STORAGE_REGION}://"
 
 # Retrieve database credentials from AWS Secrets Manager
 try:

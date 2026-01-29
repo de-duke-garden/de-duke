@@ -56,6 +56,13 @@ class DrfApi(Construct):
             "MediaStorage",
             block_public_access=s3.BlockPublicAccess(block_public_policy=False),
             public_read_access=True,
+            cors=[
+                s3.CorsRule(
+                    allowed_headers=["*"],
+                    allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.POST],
+                    allowed_origins=["*"],
+                )
+            ],
         )
 
         user_data = ec2.UserData.for_linux()
