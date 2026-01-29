@@ -116,3 +116,7 @@ prod-ps:
 prod-prune:
 	@echo "Cleaning up unused production containers, networks, images, and volumes"
 	docker system prune -f && docker volume prune -f
+
+prod-collectstatic:
+	@echo "Collecting static files for production"
+	docker compose -f compose.aws.yaml exec backend python manage.py collectstatic --noinput

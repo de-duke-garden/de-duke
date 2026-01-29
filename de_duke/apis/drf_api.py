@@ -116,6 +116,7 @@ STATIC_STORAGE_BUCKET_NAME={static_storage.bucket_name}
 EOF
             """,
             # "sudo docker compose -f compose.aws.yaml up -d",
+            "sudo make prod-collectstatic",
             "sudo make prod-start",
         )
 
