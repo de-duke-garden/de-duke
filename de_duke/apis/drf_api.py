@@ -53,7 +53,8 @@ class DrfApi(Construct):
         )
         media_storage = s3.Bucket(
             self,
-            "MediaStorage"
+            "MediaStorage",
+            public_read_access=True,
         )
 
         user_data = ec2.UserData.for_linux()
