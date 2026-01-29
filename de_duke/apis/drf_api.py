@@ -128,6 +128,7 @@ EOF
         config["shared"].email_secret.grant_read(asg)
         config["shared"].gcp_secret.grant_read(asg)
         app_asset.grant_read(asg)
+        media_storage.grant_read_write(asg)
         config["databases"].grant_connect(asg)
         config["agents"].grant_access(asg.role)
 
