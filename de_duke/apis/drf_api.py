@@ -64,6 +64,19 @@ class DrfApi(Construct):
                 )
             ],
         )
+        static_storage = s3.Bucket(
+            self,
+            "StaticStorage",
+            block_public_access=s3.BlockPublicAccess(block_public_policy=False),
+            public_read_access=True,
+            cors=[
+                s3.CorsRule(
+                    allowed_headers=["*"],
+                    allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.POST],
+                    allowed_origins=["*"],
+                )
+            ],
+        )
 
         user_data = ec2.UserData.for_linux()
         user_data.add_commands(
@@ -89,6 +102,7 @@ C_INCLUDE_PATH=/usr/include/gdal
 GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
 DJANGO_SETTINGS_MODULE=main.settings.aws
 MEDIA_STORAGE_BUCKET_NAME={media_storage.bucket_name}
+STATIC_STORAGE_BUCKET_NAME={static_storage.bucket_name}
 {
                 "\n".join(
                     [
@@ -129,6 +143,7 @@ EOF
         config["shared"].gcp_secret.grant_read(asg)
         app_asset.grant_read(asg)
         media_storage.grant_read_write(asg)
+        static_storage.grant_read_write(asg)
         config["databases"].grant_connect(asg)
         config["agents"].grant_access(asg.role)
 
