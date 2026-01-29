@@ -57,9 +57,20 @@ class UserAdmin(BaseUserAdmin, nested_admin.NestedModelAdmin):
     inlines = [PhoneNumberInline, HostAccountInline]
 
 
-@admin.register(OTPRequest)
-class OTPRequestAdmin(nested_admin.NestedModelAdmin):
-    list_display = ("ref", "otp", "is_verified", "has_expired", "created_at")
-    search_fields = ("ref",)
+# @admin.register(OTPRequest)
+# class OTPRequestAdmin(nested_admin.NestedModelAdmin):
+#     list_display = ("ref", "otp", "is_verified", "has_expired", "created_at")
+#     search_fields = ("ref",)
+#     ordering = ("-created_at",)
+#     list_filter = ("created_at",)
+
+@admin.register(HostAccount)
+class HostAccountAdmin(nested_admin.NestedModelAdmin):
+    list_display = ("user", "is_verified", "created_at")
+    search_fields = ("user__email", "user__first_name", "user__last_name")
+    list_filter = ("is_verified",)
     ordering = ("-created_at",)
-    list_filter = ("created_at",)
+
+    def has_add_permission(self, request, obj=None):
+        # Prevent adding HostAccount from admin
+        return False
