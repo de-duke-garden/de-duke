@@ -54,6 +54,7 @@ class DrfApi(Construct):
         media_storage = s3.Bucket(
             self,
             "MediaStorage",
+            block_public_access=s3.BlockPublicAccess(block_public_policy=False),
             public_read_access=True,
         )
 
