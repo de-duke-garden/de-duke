@@ -85,7 +85,7 @@ class CommercialPropertySerializer(serializers.ModelSerializer):
     primary_image = serializers.ImageField(read_only=True)
     image__1__is_primary = serializers.BooleanField(write_only=True, required=False)
     image__1__image = serializers.ImageField(write_only=True, required=False, allow_null=True)
-    room__1__area = serializers.CharField(write_only=True, required=False)
+    # room__1__area = serializers.CharField(write_only=True, required=False)
     room__1__level = serializers.CharField(write_only=True, required=False)
     room__1__dimention_width = serializers.DecimalField(
         write_only=True, required=False, max_digits=10, decimal_places=2)

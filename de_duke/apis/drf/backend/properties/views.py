@@ -391,6 +391,9 @@ class HostCommercialPropertyViewSet(
                 property=property_instance,
                 **room_data
             )
+        # Update the property instance to reflect rooms count if rooms were added
+        if rooms:
+            property_instance.save()
         # Return the serialized property instance
         return Response(
             self.get_serializer(property_instance).data,
@@ -469,6 +472,9 @@ class HostCommercialPropertyViewSet(
                         property=property_instance,
                         **room_data
                     )
+        # Update the property instance to reflect rooms count if rooms were modified
+        if rooms:
+            property_instance.save()
         # Return the serialized property instance
         return Response(
             self.get_serializer(property_instance).data,
@@ -548,6 +554,9 @@ class HostCommercialPropertyViewSet(
                         property=property_instance,
                         **room_data
                     )
+        # Update the property instance to reflect rooms count if rooms were modified
+        if rooms:
+            property_instance.save()
         # Return the serialized property instance
         return Response(
             self.get_serializer(property_instance).data,

@@ -338,9 +338,10 @@ class CommercialProperty(Property):
         """
         Calculate the total number of rooms in the property.
         """
-        if hasattr(self, 'rooms'):
+        try:
             return self.rooms.count()
-        return 0
+        except Exception:
+            return 0
 
     def is_bookmarked(self, user):
         """
