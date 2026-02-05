@@ -65,3 +65,4 @@ numpy
 paystack-sdk
 google-genai
 djangorestframework-gis
+django-image-uploader-widget

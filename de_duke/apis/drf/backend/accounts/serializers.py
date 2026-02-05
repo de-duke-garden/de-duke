@@ -1,5 +1,14 @@
 from rest_framework import serializers
-from .models import HostAccount, User, PhoneNumber
+from .models import (
+    HostAccountAgent,
+    HostAccountArchitect,
+    HostAccountCompany,
+    HostAccountLawyer,
+    HostAccountOwner,
+    HostAccountSurveyor,
+    User,
+    PhoneNumber,
+)
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -94,11 +103,43 @@ class VerifyEmailWithTokenSerializer(serializers.Serializer):
     token = serializers.CharField()
 
 
-class BecomeAHostSerializer(serializers.ModelSerializer):
-    """Serializer for becoming a host.
-It includes fields for identity type, number, image, and host photo.
-    """
+class BecomeAHostAgentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = HostAccount
-        exclude = ['user', 'created_at', 'updated_at']
+        model = HostAccountAgent
+        exclude = ['user', 'type', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'is_verified', 'created_at', 'updated_at']
+
+
+class BecomeAHostArchitectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostAccountArchitect
+        exclude = ['user', 'type', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'is_verified', 'created_at', 'updated_at']
+
+
+class BecomeAHostCompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostAccountCompany
+        exclude = ['user', 'type', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'is_verified', 'created_at', 'updated_at']
+
+
+class BecomeAHostLawyerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostAccountLawyer
+        exclude = ['user', 'type', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'is_verified', 'created_at', 'updated_at']
+
+
+class BecomeAHostOwnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostAccountOwner
+        exclude = ['user', 'type', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'is_verified', 'created_at', 'updated_at']
+
+
+class BecomeAHostSurveyorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostAccountSurveyor
+        exclude = ['user', 'type', 'created_at', 'updated_at']
         read_only_fields = ['id', 'is_verified', 'created_at', 'updated_at']

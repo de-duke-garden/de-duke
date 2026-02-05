@@ -14,9 +14,17 @@ from rest_framework.response import Response
 from rest_framework import status, viewsets
 from django.contrib.auth import get_user_model
 from .models import OTPRequest, HostAccount
-from .serializers import BecomeAHostSerializer, PhoneNumberSerializer, ResetPasswordWithTokenSerializer, UserCreateSerializer
+from .serializers import PhoneNumberSerializer, ResetPasswordWithTokenSerializer, UserCreateSerializer
 from .serializers import UserSerializer, UserMeSerializer, ChangeAccountPasswordSerializer, VerifyEmailSerializer
 from .serializers import SendOTPSerializer, VerifyOTPSerializer, ResetPasswordSerializer
+from .serializers import (
+    BecomeAHostAgentSerializer,
+    BecomeAHostArchitectSerializer,
+    BecomeAHostCompanySerializer,
+    BecomeAHostLawyerSerializer,
+    BecomeAHostOwnerSerializer,
+    BecomeAHostSurveyorSerializer
+)
 import logging
 import jwt
 from django.conf import settings
@@ -100,10 +108,60 @@ class UserViewSet(viewsets.mixins.ListModelMixin,
             status.HTTP_400_BAD_REQUEST: None,
         }
     ),
-    become_host=extend_schema(
-        summary="Become Host",
-        description="Become a host by providing identity details.",
-        request=BecomeAHostSerializer,
+    become_host_agent=extend_schema(
+        summary="Become Host Agent",
+        description="Become a host agent by providing identity details.",
+        request=BecomeAHostAgentSerializer,
+        responses={
+            status.HTTP_201_CREATED: None,
+            status.HTTP_400_BAD_REQUEST: None,
+            status.HTTP_404_NOT_FOUND: None,
+        }
+    ),
+    become_host_architect=extend_schema(
+        summary="Become Host Architect",
+        description="Become a host architect by providing identity details.",
+        request=BecomeAHostArchitectSerializer,
+        responses={
+            status.HTTP_201_CREATED: None,
+            status.HTTP_400_BAD_REQUEST: None,
+            status.HTTP_404_NOT_FOUND: None,
+        }
+    ),
+    become_host_company=extend_schema(
+        summary="Become Host Company",
+        description="Become a host company by providing identity details.",
+        request=BecomeAHostCompanySerializer,
+        responses={
+            status.HTTP_201_CREATED: None,
+            status.HTTP_400_BAD_REQUEST: None,
+            status.HTTP_404_NOT_FOUND: None,
+        }
+    ),
+    become_host_lawyer=extend_schema(
+        summary="Become Host Lawyer",
+        description="Become a host lawyer by providing identity details.",
+        request=BecomeAHostLawyerSerializer,
+        responses={
+            status.HTTP_201_CREATED: None,
+            status.HTTP_400_BAD_REQUEST: None,
+            status.HTTP_404_NOT_FOUND: None,
+        }
+    ),
+    become_host_owner=extend_schema(
+        summary="Become Host Owner",
+        description="Become a host owner by providing identity details.",
+        request=BecomeAHostOwnerSerializer,
+        responses={
+            status.HTTP_201_CREATED: None,
+            status.HTTP_400_BAD_REQUEST: None,
+            status.HTTP_404_NOT_FOUND: None,
+        }
+    ),
+    become_host_surveyor=extend_schema(
+        summary="Become Host Surveyor",
+        description="Become a host surveyor by providing identity details.",
+        request=BecomeAHostSurveyorSerializer,
         responses={
             status.HTTP_201_CREATED: None,
             status.HTTP_400_BAD_REQUEST: None,
@@ -124,8 +182,18 @@ class UserMeViewSet(viewsets.GenericViewSet):
             return UserMeSerializer
         elif self.action == 'add_phone_number':
             return PhoneNumberSerializer
-        elif self.action == 'become_host':
-            return BecomeAHostSerializer
+        elif self.action == 'become_host_agent':
+            return BecomeAHostAgentSerializer
+        elif self.action == 'become_host_architect':
+            return BecomeAHostArchitectSerializer
+        elif self.action == 'become_host_company':
+            return BecomeAHostCompanySerializer
+        elif self.action == 'become_host_lawyer':
+            return BecomeAHostLawyerSerializer
+        elif self.action == 'become_host_owner':
+            return BecomeAHostOwnerSerializer
+        elif self.action == 'become_host_surveyor':
+            return BecomeAHostSurveyorSerializer
         elif self.action == 'change_password':
             return ChangeAccountPasswordSerializer
         return UserMeSerializer
@@ -189,20 +257,103 @@ class UserMeViewSet(viewsets.GenericViewSet):
             return Response(PhoneNumberSerializer(user.phone_number).data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(methods=['POST'], detail=False, url_path='become-host', )
-    def become_host(self, request: Request, *args, **kwargs):
+    @action(methods=['POST'], detail=False, url_path='become-host/agent', )
+    def become_host_agent(self, request: Request, *args, **kwargs):
         """
-        Become a host by providing identity details.
+        Become a host agent by providing identity details.
         """
         try:
             user = request.user
-            serializer = BecomeAHostSerializer(data=request.data)
+            serializer = BecomeAHostAgentSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save(user=user)
-            return Response({'detail': 'Host account created successfully'
+            return Response({'detail': 'Host agent account created successfully'
                          }, status=status.HTTP_201_CREATED)
-        except User.host_account.RelatedObjectDoesNotExist:
-            return Response({'detail': 'Host account already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error in become_host_agent: {e}")
+            return Response({'detail': e.args[0]}, status=status.HTTP_404_NOT_FOUND)
+    
+    @action(methods=['POST'], detail=False, url_path='become-host/architect', )
+    def become_host_architect(self, request: Request, *args, **kwargs):
+        """
+        Become a host architect by providing identity details.
+        """
+        try:
+            user = request.user
+            serializer = BecomeAHostArchitectSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user)
+            return Response({'detail': 'Host architect account created successfully'
+                         }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Error in become_host_architect: {e}")
+            return Response({'detail': e.args[0]}, status=status.HTTP_404_NOT_FOUND)
+    
+    @action(methods=['POST'], detail=False, url_path='become-host/company', )
+    def become_host_company(self, request: Request, *args, **kwargs):
+        """
+        Become a host company by providing identity details.
+        """
+        try:
+            user = request.user
+            serializer = BecomeAHostCompanySerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user)
+            return Response({'detail': 'Host company account created successfully'
+                         }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Error in become_host_company: {e}")
+            return Response({'detail': e.args[0]}, status=status.HTTP_404_NOT_FOUND)
+        
+    @action(methods=['POST'], detail=False, url_path='become-host/lawyer', )
+    def become_host_lawyer(self, request: Request, *args, **kwargs):
+        """
+        Become a host lawyer by providing identity details.
+        """
+        try:
+            user = request.user
+            serializer = BecomeAHostLawyerSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user)
+            return Response({'detail': 'Host lawyer account created successfully'
+                         }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Error in become_host_lawyer: {e}")
+            return Response({'detail': e.args[0]}, status=status.HTTP_404_NOT_FOUND)
+        
+    @action(methods=['POST'], detail=False, url_path='become-host/owner', )
+    def become_host_owner(self, request: Request, *args, **kwargs):
+        """
+        Become a host owner by providing identity details.
+        """
+        try:
+            user = request.user
+            serializer = BecomeAHostOwnerSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user)
+            return Response({'detail': 'Host owner account created successfully'
+                         }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Error in become_host_owner: {e}")
+            return Response({'detail': e.args[0]}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['POST'], detail=False, url_path='become-host/surveyor', )
+    def become_host_surveyor(self, request: Request, *args, **kwargs):
+        """
+        Become a host surveyor by providing identity details.
+        """
+        try:
+            user = request.user
+            serializer = BecomeAHostSurveyorSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user)
+            return Response({'detail': 'Host surveyor account created successfully'
+                         }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Error in become_host_surveyor: {e}")
+            return Response({'detail': e.args[0]}, status=status.HTTP_404_NOT_FOUND)
+    
+
 
 
 
