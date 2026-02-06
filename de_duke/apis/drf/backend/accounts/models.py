@@ -119,7 +119,7 @@ class User(AbstractUser):
 
     def is_host(self):
         try:
-            return self.host_account is not None
+            return self.host_account.exists()
         except Exception as e:
             logger.error(e)
             return False
@@ -271,7 +271,7 @@ class UploadHostAccountHelper:
 
     def __call__(self, instance, filename: str):
         root, ext = os.path.splitext(filename)
-        return f"hosts/{instance.user.email}/{self.field_name}.{ext}"
+        return f"hosts/{instance.user.id}/{self.field_name}.{ext}"
 
 
 class HostAccount(TimeStampedBaseModel):
