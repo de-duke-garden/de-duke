@@ -2,7 +2,17 @@ import nested_admin
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import OTPRequest, User, PhoneNumber, HostAccount
+from utilities.mixins import ImageUploaderWidgetAdminMixin
+
+from .models import OTPRequest, User, PhoneNumber
+from .models import (
+    HostAccountAgent,
+    HostAccountArchitect,
+    HostAccountCompany,
+    HostAccountLawyer,
+    HostAccountOwner,
+    HostAccountSurveyor,
+)
 
 
 admin.site.site_header = "De-Duke Garden Care"
@@ -16,14 +26,16 @@ class PhoneNumberInline(nested_admin.NestedTabularInline):
     max_num = 1
 
 
-class HostAccountInline(nested_admin.NestedStackedInline):
-    model = HostAccount
-    extra = 0
-    max_num = 1
+# class HostAccountInline(nested_admin.NestedStackedInline):
+#     model = HostAccount
+#     extra = 0
+#     max_num = 1
 
 
 @admin.register(User)
-class UserAdmin(BaseUserAdmin, nested_admin.NestedModelAdmin):
+class UserAdmin(
+    ImageUploaderWidgetAdminMixin, BaseUserAdmin, nested_admin.NestedModelAdmin
+):
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         (_("Personal info"), {"fields": ("first_name", "last_name")}),
@@ -54,7 +66,10 @@ class UserAdmin(BaseUserAdmin, nested_admin.NestedModelAdmin):
     list_display = ("email", "first_name", "last_name", "is_staff")
     search_fields = ("first_name", "last_name", "email")
     ordering = ("email",)
-    inlines = [PhoneNumberInline, HostAccountInline]
+    inlines = [
+        PhoneNumberInline,
+        # HostAccountInline
+    ]
 
 
 # @admin.register(OTPRequest)
@@ -64,13 +79,65 @@ class UserAdmin(BaseUserAdmin, nested_admin.NestedModelAdmin):
 #     ordering = ("-created_at",)
 #     list_filter = ("created_at",)
 
-@admin.register(HostAccount)
-class HostAccountAdmin(nested_admin.NestedModelAdmin):
-    list_display = ("user", "is_verified", "created_at")
+
+class HostAccountAdminMixin:
+    list_display = ("user", "status", "created_at")
     search_fields = ("user__email", "user__first_name", "user__last_name")
-    list_filter = ("is_verified",)
+    list_filter = ("status",)
     ordering = ("-created_at",)
+
+    def get_exclude(self, request, obj=None):
+        exclude = ["type"]
+        # if obj is None:
+        #     exclude.extend(['address', 'listed_by'])
+        return exclude
 
     def has_add_permission(self, request, obj=None):
         # Prevent adding HostAccount from admin
         return False
+
+    def has_delete_permission(self, request, obj=None):
+        # Prevent deleting HostAccount from admin
+        return False
+
+
+@admin.register(HostAccountAgent)
+class HostAccountAgentAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass
+
+
+@admin.register(HostAccountArchitect)
+class HostAccountArchitectAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass
+
+
+@admin.register(HostAccountCompany)
+class HostAccountCompanyAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass
+
+
+@admin.register(HostAccountLawyer)
+class HostAccountLawyerAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass
+
+
+@admin.register(HostAccountOwner)
+class HostAccountOwnerAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass
+
+
+@admin.register(HostAccountSurveyor)
+class HostAccountSurveyorAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass

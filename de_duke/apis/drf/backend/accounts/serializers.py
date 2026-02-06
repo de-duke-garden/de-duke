@@ -1,5 +1,14 @@
 from rest_framework import serializers
-from .models import HostAccount, User, PhoneNumber
+from .models import (
+    HostAccountAgent,
+    HostAccountArchitect,
+    HostAccountCompany,
+    HostAccountLawyer,
+    HostAccountOwner,
+    HostAccountSurveyor,
+    User,
+    PhoneNumber,
+)
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -10,25 +19,38 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ["first_name", "last_name", "email", "password"]
+        extra_kwargs = {"password": {"write_only": True}}
 
 
 class UserSerializer(serializers.ModelSerializer):
-    full_name = serializers.CharField(source='get_full_name', read_only=True)
+    full_name = serializers.CharField(source="get_full_name", read_only=True)
     has_google_account = serializers.BooleanField(read_only=True)
     has_cognito_account = serializers.BooleanField(read_only=True)
     has_phone_number = serializers.BooleanField(read_only=True)
     phone_number = serializers.CharField(
-        source='get_phone_number', read_only=True, allow_null=True)
+        source="get_phone_number", read_only=True, allow_null=True
+    )
     is_host = serializers.BooleanField(read_only=True)
     is_host_verified = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'full_name', 'email', 'is_active', 'date_joined',
-                  'last_login', 'has_google_account', 'has_cognito_account', 'has_phone_number', 'phone_number', 'is_host', 'is_host_verified']
-        read_only_fields = ['id', 'date_joined', 'last_login', 'is_active']
+        fields = [
+            "id",
+            "full_name",
+            "email",
+            "is_active",
+            "date_joined",
+            "last_login",
+            "has_google_account",
+            "has_cognito_account",
+            "has_phone_number",
+            "phone_number",
+            "is_host",
+            "is_host_verified",
+        ]
+        read_only_fields = ["id", "date_joined", "last_login", "is_active"]
 
     def get_phone_number(self, obj):
         """
@@ -42,21 +64,42 @@ class UserSerializer(serializers.ModelSerializer):
 class PhoneNumberSerializer(serializers.ModelSerializer):
     class Meta:
         model = PhoneNumber
-        fields = ['mobile', 'is_verified']
-        read_only_fields = ['is_verified']
+        fields = ["mobile", "is_verified"]
+        read_only_fields = ["is_verified"]
 
 
 class UserMeSerializer(serializers.ModelSerializer):
     phone_number = PhoneNumberSerializer(required=False, read_only=True)
     is_host = serializers.BooleanField(read_only=True)
     is_host_verified = serializers.BooleanField(read_only=True)
+    host_status = serializers.CharField(
+        allow_null=True, allow_blank=True, read_only=True
+    )
+    host_status_reason = serializers.CharField(
+        allow_null=True, allow_blank=True, read_only=True
+    )
 
     class Meta:
         model = User
-        exclude = ['password', 'is_superuser',
-                   'is_staff', 'firebase_uid', 'cognito_uid']
-        read_only_fields = ['id', 'date_joined', 'last_login', 'is_active', 'is_staff',
-                            'is_superuser', 'email_verified', 'email', 'groups', 'user_permissions']
+        exclude = [
+            "password",
+            "is_superuser",
+            "is_staff",
+            "firebase_uid",
+            "cognito_uid",
+        ]
+        read_only_fields = [
+            "id",
+            "date_joined",
+            "last_login",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+            "email_verified",
+            "email",
+            "groups",
+            "user_permissions",
+        ]
 
 
 class ChangeAccountPasswordSerializer(serializers.Serializer):
@@ -94,11 +137,85 @@ class VerifyEmailWithTokenSerializer(serializers.Serializer):
     token = serializers.CharField()
 
 
-class BecomeAHostSerializer(serializers.ModelSerializer):
-    """Serializer for becoming a host.
-It includes fields for identity type, number, image, and host photo.
-    """
+class BecomeAHostAgentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = HostAccount
-        exclude = ['user', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'is_verified', 'created_at', 'updated_at']
+        model = HostAccountAgent
+        exclude = ["user", "type", "created_at", "updated_at"]
+        read_only_fields = [
+            "id",
+            "status",
+            "status_reason",
+            "is_verified",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class BecomeAHostArchitectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostAccountArchitect
+        exclude = ["user", "type", "created_at", "updated_at"]
+        read_only_fields = [
+            "id",
+            "status",
+            "status_reason",
+            "is_verified",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class BecomeAHostCompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostAccountCompany
+        exclude = ["user", "type", "created_at", "updated_at"]
+        read_only_fields = [
+            "id",
+            "status",
+            "status_reason",
+            "is_verified",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class BecomeAHostLawyerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostAccountLawyer
+        exclude = ["user", "type", "created_at", "updated_at"]
+        read_only_fields = [
+            "id",
+            "status",
+            "status_reason",
+            "is_verified",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class BecomeAHostOwnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostAccountOwner
+        exclude = ["user", "type", "created_at", "updated_at"]
+        read_only_fields = [
+            "id",
+            "status",
+            "status_reason",
+            "is_verified",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class BecomeAHostSurveyorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostAccountSurveyor
+        exclude = ["user", "type", "created_at", "updated_at"]
+        read_only_fields = [
+            "id",
+            "status",
+            "status_reason",
+            "is_verified",
+            "created_at",
+            "updated_at",
+        ]

@@ -66,9 +66,9 @@ class Migration(migrations.Migration):
                 ('is_verified', models.BooleanField(default=False, help_text='Designates whether the host account has been verified.')),
                 ('identity_type', models.CharField(choices=[('bvn', 'BVN'), ('nin', 'NIN'), ('passport', 'National Passport')], max_length=50, verbose_name='Identity Type')),
                 ('identity_image', models.ImageField(max_length=255, upload_to=accounts.models.upload_identity_image, verbose_name='Identity Shot')),
-                ('host_photo', models.ImageField(max_length=255, upload_to=accounts.models.upload_host_image, verbose_name='Host Photo')),
+                ('host_photo', models.ImageField(max_length=255, upload_to=accounts.models.UploadHostAccountHelper('host_photo'), verbose_name='Host Photo')),
                 ('identity_number', models.CharField(help_text='Unique number for the identity.', max_length=100, unique=True, verbose_name='Identity Number')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='host_account', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='host_account', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'Host Account',

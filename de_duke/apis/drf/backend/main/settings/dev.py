@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'nested_admin',
     'mapwidgets',
     'rest_framework_gis',
+    'image_uploader_widget',
     # Platform packages
     'django.contrib.admin',
     'django.contrib.auth',
