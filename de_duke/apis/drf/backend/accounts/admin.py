@@ -11,7 +11,7 @@ from .models import (
     HostAccountCompany,
     HostAccountLawyer,
     HostAccountOwner,
-    HostAccountSurveyor
+    HostAccountSurveyor,
 )
 
 
@@ -33,7 +33,9 @@ class PhoneNumberInline(nested_admin.NestedTabularInline):
 
 
 @admin.register(User)
-class UserAdmin(ImageUploaderWidgetAdminMixin, BaseUserAdmin, nested_admin.NestedModelAdmin):
+class UserAdmin(
+    ImageUploaderWidgetAdminMixin, BaseUserAdmin, nested_admin.NestedModelAdmin
+):
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         (_("Personal info"), {"fields": ("first_name", "last_name")}),
@@ -77,73 +79,65 @@ class UserAdmin(ImageUploaderWidgetAdminMixin, BaseUserAdmin, nested_admin.Neste
 #     ordering = ("-created_at",)
 #     list_filter = ("created_at",)
 
-@admin.register(HostAccountAgent)
-class HostAccountAgentAdmin(ImageUploaderWidgetAdminMixin, nested_admin.NestedModelAdmin):
+
+class HostAccountAdminMixin:
     list_display = ("user", "status", "created_at")
     search_fields = ("user__email", "user__first_name", "user__last_name")
     list_filter = ("status",)
     ordering = ("-created_at",)
 
+    def get_exclude(self, request, obj=None):
+        exclude = ["type"]
+        # if obj is None:
+        #     exclude.extend(['address', 'listed_by'])
+        return exclude
+
     def has_add_permission(self, request, obj=None):
         # Prevent adding HostAccount from admin
         return False
+
+    def has_delete_permission(self, request, obj=None):
+        # Prevent deleting HostAccount from admin
+        return False
+
+
+@admin.register(HostAccountAgent)
+class HostAccountAgentAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass
 
 
 @admin.register(HostAccountArchitect)
-class HostAccountArchitectAdmin(ImageUploaderWidgetAdminMixin, nested_admin.NestedModelAdmin):
-    list_display = ("user", "status", "created_at")
-    search_fields = ("user__email", "user__first_name", "user__last_name")
-    list_filter = ("status",)
-    ordering = ("-created_at",)
-
-    def has_add_permission(self, request, obj=None):
-        # Prevent adding HostAccount from admin
-        return False
+class HostAccountArchitectAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass
 
 
 @admin.register(HostAccountCompany)
-class HostAccountCompanyAdmin(ImageUploaderWidgetAdminMixin, nested_admin.NestedModelAdmin):
-    list_display = ("user", "status", "created_at")
-    search_fields = ("user__email", "user__first_name", "user__last_name")
-    list_filter = ("status",)
-    ordering = ("-created_at",)
-
-    def has_add_permission(self, request, obj=None):
-        # Prevent adding HostAccount from admin
-        return False
+class HostAccountCompanyAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass
 
 
 @admin.register(HostAccountLawyer)
-class HostAccountLawyerAdmin(ImageUploaderWidgetAdminMixin, nested_admin.NestedModelAdmin):
-    list_display = ("user", "status", "created_at")
-    search_fields = ("user__email", "user__first_name", "user__last_name")
-    list_filter = ("status",)
-    ordering = ("-created_at",)
-
-    def has_add_permission(self, request, obj=None):
-        # Prevent adding HostAccount from admin
-        return False
+class HostAccountLawyerAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass
 
 
 @admin.register(HostAccountOwner)
-class HostAccountOwnerAdmin(ImageUploaderWidgetAdminMixin, nested_admin.NestedModelAdmin):
-    list_display = ("user", "status", "created_at")
-    search_fields = ("user__email", "user__first_name", "user__last_name")
-    list_filter = ("status",)
-    ordering = ("-created_at",)
-
-    def has_add_permission(self, request, obj=None):
-        # Prevent adding HostAccount from admin
-        return False
+class HostAccountOwnerAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass
 
 
 @admin.register(HostAccountSurveyor)
-class HostAccountSurveyorAdmin(ImageUploaderWidgetAdminMixin, nested_admin.NestedModelAdmin):
-    list_display = ("user", "status", "created_at")
-    search_fields = ("user__email", "user__first_name", "user__last_name")
-    list_filter = ("status",)
-    ordering = ("-created_at",)
-
-    def has_add_permission(self, request, obj=None):
-        # Prevent adding HostAccount from admin
-        return False
+class HostAccountSurveyorAdmin(
+    ImageUploaderWidgetAdminMixin, HostAccountAdminMixin, nested_admin.NestedModelAdmin
+):
+    pass

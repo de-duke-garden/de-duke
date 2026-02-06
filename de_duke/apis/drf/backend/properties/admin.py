@@ -35,29 +35,32 @@ logger = logging.getLogger("django")
 
 
 class PropertyImageInline(
-    # PropertyAdminInlineProxy, 
-    nested_admin.NestedTabularInline):
+    # PropertyAdminInlineProxy,
+    nested_admin.NestedTabularInline
+):
     model = models.PropertyImage
     extra = 0
     max_num = 5
     min_num = 1
-    fields = ('image', 'is_primary')
+    fields = ("image", "is_primary")
 
 
 class CommercialPropertyRoomInline(
-    # PropertyAdminInlineProxy, 
-    nested_admin.NestedTabularInline):
+    # PropertyAdminInlineProxy,
+    nested_admin.NestedTabularInline
+):
     model = models.CommercialPropertyRoom
     extra = 0
     min_num = 0
-    fields = ('level', 'dimention_width', 'dimention_length')
+    fields = ("level", "dimention_width", "dimention_length")
+
 
 class VerifiedPropertyInline(nested_admin.NestedStackedInline):
     model = models.VerifiedProperty
     extra = 0
     max_num = 1
     min_num = 0
-    readonly_fields = ('verified_by', 'created_at')
+    readonly_fields = ("verified_by", "created_at")
 
 
 class BannedPropertyInline(nested_admin.NestedTabularInline):
@@ -65,21 +68,28 @@ class BannedPropertyInline(nested_admin.NestedTabularInline):
     extra = 0
     max_num = 1
     min_num = 0
-    readonly_fields = ('banned_by', 'created_at')
+    readonly_fields = ("banned_by", "created_at")
 
 
 class PropertyAdminProxy:
     formfield_overrides = {
-        gis_models.PointField: {"widget": mapwidgets.GoogleMapPointFieldWidget(
-            attrs={
-                'style': 'width: 100%; height: 400px;',
-                'map_options': {
-                    'zoom': 15,
-                    'center': {'lat': 0, 'lng': 0},
-                },
-            }
-        )}
+        gis_models.PointField: {
+            "widget": mapwidgets.GoogleMapPointFieldWidget(
+                attrs={
+                    "style": "width: 100%; height: 400px;",
+                    "map_options": {
+                        "zoom": 15,
+                        "center": {"lat": 0, "lng": 0},
+                    },
+                }
+            )
+        }
     }
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "listed_by":
+            kwargs["queryset"] = models.HostAccount.objects.filter(status="verified")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def save_model(self, request, obj, form, change):
         # if not change:
@@ -88,6 +98,7 @@ class PropertyAdminProxy:
         Override the save method to reverse geocode the location into an address
         only if the location has changed.
         """
+
         def _update_address():
             gmaps = googlemaps.Client(key=settings.GOOGLE_MAP_API_KEY)
 
@@ -100,12 +111,13 @@ class PropertyAdminProxy:
                 result = gmaps.reverse_geocode((latitude, longitude))
                 if result:
                     # Extract the formatted address from the response
-                    obj.address = result[0]['formatted_address']
+                    obj.address = result[0]["formatted_address"]
             except Exception as e:
                 # Log the error if reverse geocoding fails
                 logger.error(f"Error during reverse geocoding: {e}")
 
             # Check if the instance already exists in the database
+
         if change:
             # Fetch the existing instance from the database
             existing_instance = Property.objects.get(id=obj.id)
@@ -125,7 +137,7 @@ class PropertyAdminProxy:
     #     return False  # Deny add permission if no HostAccount
 
     def get_exclude(self, request, obj=None):
-        exclude = ['property_type', 'embedding']
+        exclude = ["property_type", "embedding"]
         # if obj is None:
         #     exclude.extend(['address', 'listed_by'])
         return exclude
@@ -153,7 +165,12 @@ class PropertyAdminProxy:
 
 @admin.register(models.CommercialProperty)
 class CommercialProperty(PropertyAdminProxy, nested_admin.NestedModelAdmin):
-    inlines = [CommercialPropertyRoomInline, PropertyImageInline, VerifiedPropertyInline, BannedPropertyInline]
+    inlines = [
+        CommercialPropertyRoomInline,
+        PropertyImageInline,
+        VerifiedPropertyInline,
+        BannedPropertyInline,
+    ]
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
@@ -183,7 +200,7 @@ class ShortletProperty(PropertyAdminProxy, nested_admin.NestedModelAdmin):
 
 @admin.register(models.BannedProperty)
 class BannedPropertyAdmin(admin.ModelAdmin):
-    readonly_fields = ('banned_by',)
+    readonly_fields = ("banned_by",)
 
     def save_model(self, request, obj, form, change):
         obj.banned_by = request.user
@@ -192,7 +209,7 @@ class BannedPropertyAdmin(admin.ModelAdmin):
 
 @admin.register(models.VerifiedProperty)
 class VerifiedPropertyAdmin(admin.ModelAdmin):
-    readonly_fields = ('verified_by',)
+    readonly_fields = ("verified_by",)
 
     def save_model(self, request, obj, form, change):
         obj.verified_by = request.user

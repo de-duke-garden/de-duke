@@ -6,10 +6,14 @@ from django.contrib.auth import get_user_model
 from accounts.models import HostAccount
 import googlemaps
 from django.conf import settings
+from django.core.exceptions import ValidationError
 import logging
 from pgvector.django import VectorField, HnswIndex
 
-from utilities.helpers import property_image_upload_handler, property_media_upload_handler
+from utilities.helpers import (
+    property_image_upload_handler,
+    property_media_upload_handler,
+)
 from utilities import idx
 from .utility import text_to_embedding
 
@@ -32,18 +36,22 @@ class Property(models.Model):
     """
     Property model class
     """
+
     PROPERTY_TYPE_CHOICES = [
-        ('shortlet', 'Shortlet'),
-        ('commercial', 'Commercial'),
+        ("shortlet", "Shortlet"),
+        ("commercial", "Commercial"),
     ]
     id = models.CharField(
         primary_key=True,
         max_length=255,
         default=idx.generate_property_id,
-        editable=False
+        editable=False,
     )
     address = models.TextField(
-        null=False, blank=True, help_text="Address of the property (leave blank for reverse geocoding)")
+        null=False,
+        blank=True,
+        help_text="Address of the property (leave blank for reverse geocoding)",
+    )
     location = PointField(geography=True, null=False, blank=False)
     description = models.TextField()
     # special_tags = models.TextField(blank=True, null=True)
@@ -53,9 +61,9 @@ class Property(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     listed_by = models.ForeignKey(
-        HostAccount, related_name="properties", on_delete=models.CASCADE)
-    property_type = models.CharField(
-        max_length=50, choices=PROPERTY_TYPE_CHOICES)
+        HostAccount, related_name="properties", on_delete=models.CASCADE
+    )
+    property_type = models.CharField(max_length=50, choices=PROPERTY_TYPE_CHOICES)
     embedding = VectorField(dimensions=512, null=True, blank=True)
 
     class Meta:
@@ -68,7 +76,7 @@ class Property(models.Model):
                 fields=["embedding"],
                 m=16,
                 ef_construction=64,
-                opclasses=["vector_l2_ops"]
+                opclasses=["vector_l2_ops"],
             )
         ]
 
@@ -79,20 +87,20 @@ class Property(models.Model):
         """
         Check if the property is banned.
         """
-        return hasattr(self, 'banned') and self.banned is not None
+        return hasattr(self, "banned") and self.banned is not None
 
     def is_verified(self):
         """
         Check if the property is verified.
         """
         # return hasattr(self, 'verified') and self.verified is not None
-        return hasattr(self, 'verified') and self.verified.is_verified()
+        return hasattr(self, "verified") and self.verified.is_verified()
 
     def is_verified_by(self):
         """
         Check if the property is verified by a user.
         """
-        if hasattr(self, 'verified'):
+        if hasattr(self, "verified"):
             return self.verified.verified_by
         return None
 
@@ -102,11 +110,11 @@ class Property(models.Model):
         Get the price of the property based on its type.
         """
         if self.property_type == "commercial":
-            commercial = getattr(self, 'commercialproperty', None)
+            commercial = getattr(self, "commercialproperty", None)
             if commercial:
                 return commercial.price
         elif self.property_type == "shortlet":
-            shortlet = getattr(self, 'shortletproperty', None)
+            shortlet = getattr(self, "shortletproperty", None)
             if shortlet:
                 return shortlet.price
         return None
@@ -129,11 +137,11 @@ class Property(models.Model):
         Generate a subtitle for the property based on its type and key attributes.
         """
         if self.property_type == "commercial":
-            commercial = getattr(self, 'commercialproperty', None)
+            commercial = getattr(self, "commercialproperty", None)
             if commercial:
                 return commercial.subtitle()
         elif self.property_type == "shortlet":
-            shortlet = getattr(self, 'shortletproperty', None)
+            shortlet = getattr(self, "shortletproperty", None)
             if shortlet:
                 return shortlet.subtitle()
         return "Property"
@@ -143,11 +151,11 @@ class Property(models.Model):
         Generate a tag for the property based on its type.
         """
         if self.property_type == "commercial":
-            commercial = getattr(self, 'commercialproperty', None)
+            commercial = getattr(self, "commercialproperty", None)
             if commercial:
                 return commercial.tag()
         elif self.property_type == "shortlet":
-            shortlet = getattr(self, 'shortletproperty', None)
+            shortlet = getattr(self, "shortletproperty", None)
             if shortlet:
                 return shortlet.tag()
         return "Property"
@@ -157,11 +165,11 @@ class Property(models.Model):
         Generate a features string for the property based on its type and key attributes.
         """
         if self.property_type == "commercial":
-            commercial = getattr(self, 'commercialproperty', None)
+            commercial = getattr(self, "commercialproperty", None)
             if commercial:
                 return commercial.features()
         elif self.property_type == "shortlet":
-            shortlet = getattr(self, 'shortletproperty', None)
+            shortlet = getattr(self, "shortletproperty", None)
             if shortlet:
                 return shortlet.features()
         return ""
@@ -171,11 +179,11 @@ class Property(models.Model):
         Generate an amenities string for the property based on its type and key attributes.
         """
         if self.property_type == "commercial":
-            commercial = getattr(self, 'commercialproperty', None)
+            commercial = getattr(self, "commercialproperty", None)
             if commercial:
                 return commercial.amenities()
         elif self.property_type == "shortlet":
-            shortlet = getattr(self, 'shortletproperty', None)
+            shortlet = getattr(self, "shortletproperty", None)
             if shortlet:
                 return shortlet.amenities()
         return ""
@@ -192,20 +200,49 @@ class Property(models.Model):
             return first_image.image
         return None
 
+    def save(self, *args, **kwargs):
+        # Check if the user is a verified host
+        if (
+            not self.listed_by.user.is_host()
+            or not self.listed_by.user.is_host_verified()
+        ):
+            raise ValidationError(
+                "You do not have permission to create this property. Please wait for your host account to be verified."
+            )
+        super().save(*args, **kwargs)
+        print("listed_by type: ", self.listed_by.type)
+        if (
+            self.listed_by.type
+            in [
+                "agent",
+                "architect",
+                "company",
+                "lawyer",
+                "surveyor",
+            ]
+            and self._state.adding
+        ):
+            VerifiedProperty.objects.create(
+                property=self,
+                is_auto_verified=True,
+            )
+
 
 class PropertyImage(models.Model):
     """
     PropertyImage model class
     """
+
     id = models.CharField(
         primary_key=True,
         max_length=255,
         default=idx.generate_property_image_id,
-        editable=False
+        editable=False,
     )
     image = models.ImageField(upload_to=property_image_upload_handler)
     property = models.ForeignKey(
-        Property, related_name="images", on_delete=models.CASCADE)
+        Property, related_name="images", on_delete=models.CASCADE
+    )
     is_primary = models.BooleanField(default=False)
 
     class Meta:
@@ -244,43 +281,46 @@ class CommercialProperty(Property):
     """
     CommercialProperty model class
     """
+
     LISTING_TYPE_CHOICES = [
-        ('Sale', 'Sale'),
-        ('Lease', 'Lease'),
+        ("Sale", "Sale"),
+        ("Lease", "Lease"),
     ]
 
     COMMERCIAL_TYPE_CHOICES = [
-        ('Office', _('Office')),
-        ('Shop', _('Shop')),
-        ('Home', _('Home')),
-        ('land', _('Land')),
+        ("Office", _("Office")),
+        ("Shop", _("Shop")),
+        ("Home", _("Home")),
+        ("land", _("Land")),
     ]
 
     PARKING_FEATURE_CHOICES = [
-        ('Attached', 'Attached'),
-        ('Detached', 'Detached'),
-        ('Carport', 'Carport'),
-        ('Street', 'Street'),
+        ("Attached", "Attached"),
+        ("Detached", "Detached"),
+        ("Carport", "Carport"),
+        ("Street", "Street"),
     ]
 
     ARCHITECTURAL_STYLE_CHOICES = [
-        ('Modern', _('Modern')),
-        ('Traditional', _('Traditional')),
-        ('Industrial', _('Industrial')),
+        ("Modern", _("Modern")),
+        ("Traditional", _("Traditional")),
+        ("Industrial", _("Industrial")),
     ]
 
     PROPERTY_CONDITION_CHOICES = [
-        ('New', _('New')),
-        ('Under Renovation', _('Under Renovation')),
-        ('Under Construction', _('Under Construction')),
-        ('Bank Owned', _('Bank Owned')),
+        ("New", _("New")),
+        ("Under Renovation", _("Under Renovation")),
+        ("Under Construction", _("Under Construction")),
+        ("Bank Owned", _("Bank Owned")),
     ]
 
-    listing_type = models.CharField(
-        max_length=10, choices=LISTING_TYPE_CHOICES)
+    listing_type = models.CharField(max_length=10, choices=LISTING_TYPE_CHOICES)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     possession_period_days = models.IntegerField(
-        null=True, blank=True, help_text="Number of days a lessee can take possession after signing the lease")
+        null=True,
+        blank=True,
+        help_text="Number of days a lessee can take possession after signing the lease",
+    )
     is_sold = models.BooleanField(default=False)
     has_c_of_o = models.BooleanField(default=False)
     has_deed_of_assignment = models.BooleanField(default=False)
@@ -289,28 +329,35 @@ class CommercialProperty(Property):
     has_governors_consent = models.BooleanField(default=False)
     total_bathrooms = models.IntegerField(null=True, blank=True)
     laundry_level = models.CharField(
-        max_length=50, blank=True, null=True, choices=LEVEL_CHOICES)
+        max_length=50, blank=True, null=True, choices=LEVEL_CHOICES
+    )
     has_basement = models.BooleanField(null=True, blank=True)
     has_fireplace = models.BooleanField(null=True, blank=True)
     total_structure_area = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+        max_digits=10, decimal_places=2, blank=True, null=True
+    )
     total_interior_livable_area = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+        max_digits=10, decimal_places=2, blank=True, null=True
+    )
     finished_area_above_ground = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+        max_digits=10, decimal_places=2, blank=True, null=True
+    )
     finished_area_below_ground = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+        max_digits=10, decimal_places=2, blank=True, null=True
+    )
     total_parking_spaces = models.IntegerField(blank=True, null=True)
     parking_feature = models.CharField(
-        max_length=50, blank=True, null=True, choices=PARKING_FEATURE_CHOICES)
+        max_length=50, blank=True, null=True, choices=PARKING_FEATURE_CHOICES
+    )
     garage_spaces = models.IntegerField(blank=True, null=True)
     parcel_number = models.CharField(max_length=50, blank=True, null=True)
-    commercial_type = models.CharField(
-        max_length=50, choices=COMMERCIAL_TYPE_CHOICES)
+    commercial_type = models.CharField(max_length=50, choices=COMMERCIAL_TYPE_CHOICES)
     architectural_style = models.CharField(
-        max_length=50, blank=True, null=True, choices=ARCHITECTURAL_STYLE_CHOICES)
+        max_length=50, blank=True, null=True, choices=ARCHITECTURAL_STYLE_CHOICES
+    )
     property_condition = models.CharField(
-        max_length=50, blank=True, null=True,  choices=PROPERTY_CONDITION_CHOICES)
+        max_length=50, blank=True, null=True, choices=PROPERTY_CONDITION_CHOICES
+    )
     year_built = models.IntegerField(blank=True, null=True)
     has_fitness_center = models.BooleanField(null=True, blank=True)
     has_game_room = models.BooleanField(null=True, blank=True)
@@ -332,7 +379,9 @@ class CommercialProperty(Property):
         # if self.finished_area_above_ground and self.finished_area_below_ground:
         #     return self.finished_area_above_ground + self.finished_area_below_ground
         # return None
-        return (self.finished_area_above_ground or 0) + (self.finished_area_below_ground or 0)
+        return (self.finished_area_above_ground or 0) + (
+            self.finished_area_below_ground or 0
+        )
 
     def total_rooms(self):
         """
@@ -390,14 +439,11 @@ class CommercialProperty(Property):
         if self.total_structure_area:
             features.append(f"{self.total_structure_area} sqft Structure Area")
         if self.total_interior_livable_area:
-            features.append(
-                f"{self.total_interior_livable_area} sqft Livable Area")
+            features.append(f"{self.total_interior_livable_area} sqft Livable Area")
         if self.finished_area_above_ground:
-            features.append(
-                f"{self.finished_area_above_ground} sqft Above Ground")
+            features.append(f"{self.finished_area_above_ground} sqft Above Ground")
         if self.finished_area_below_ground:
-            features.append(
-                f"{self.finished_area_below_ground} sqft Below Ground")
+            features.append(f"{self.finished_area_below_ground} sqft Below Ground")
         if self.finished_area():
             features.append(f"{self.finished_area()} sqft Finished Area")
         if self.total_parking_spaces:
@@ -469,11 +515,11 @@ class CommercialProperty(Property):
         """
         Override the save method to set the property type based on the model.
         """
-        self.property_type = 'commercial'
-        if not self.possession_period_days and self.listing_type == 'Lease':
+        self.property_type = "commercial"
+        if not self.possession_period_days and self.listing_type == "Lease":
             # Default possession period for lease is 365 days = 1 year
             self.possession_period_days = 365
-        if self.listing_type == 'Sale':
+        if self.listing_type == "Sale":
             self.possession_period_days = None
         embedding = self.generate_embedding()
         if embedding:
@@ -485,17 +531,19 @@ class CommercialPropertyRoom(models.Model):
     """
     CommercialPropertyRoom model class
     """
+
     id = models.CharField(
         primary_key=True,
         max_length=255,
         default=idx.generate_property_room_id,
-        editable=False
+        editable=False,
     )
     level = models.CharField(max_length=50, choices=LEVEL_CHOICES)
     dimention_width = models.DecimalField(max_digits=10, decimal_places=2)
     dimention_length = models.DecimalField(max_digits=10, decimal_places=2)
     property = models.ForeignKey(
-        CommercialProperty, related_name="rooms", on_delete=models.CASCADE)
+        CommercialProperty, related_name="rooms", on_delete=models.CASCADE
+    )
 
     class Meta:
         verbose_name = "Home Property Room"
@@ -518,19 +566,20 @@ class ShortletProperty(Property):
     """
     ShortletProperty model class
     """
+
     SHORTLET_TYPE_CHOICES = [
-        ('Hostel', 'Hostel'),
-        ('Hotel', 'Hotel'),
-        ('1 Bedroom', '1 Bedroom'),
-        ('2 Bedroom', '2 Bedroom'),
-        ('3 Bedroom', '3 Bedroom'),
+        ("Hostel", "Hostel"),
+        ("Hotel", "Hotel"),
+        ("1 Bedroom", "1 Bedroom"),
+        ("2 Bedroom", "2 Bedroom"),
+        ("3 Bedroom", "3 Bedroom"),
     ]
 
     price = models.DecimalField(max_digits=10, decimal_places=2)
     possession_period_days = models.IntegerField(
-        help_text="Number of days a tenant can take possession after signing the shortlet agreement")
-    shortlet_type = models.CharField(
-        max_length=50, choices=SHORTLET_TYPE_CHOICES)
+        help_text="Number of days a tenant can take possession after signing the shortlet agreement"
+    )
+    shortlet_type = models.CharField(max_length=50, choices=SHORTLET_TYPE_CHOICES)
     total_bathrooms = models.IntegerField(null=True, blank=True)
     has_dishwasher = models.BooleanField(null=True, blank=True)
     has_washer = models.BooleanField(null=True, blank=True)
@@ -613,7 +662,7 @@ class ShortletProperty(Property):
         """
         Override the save method to set the property type based on the model.
         """
-        self.property_type = 'shortlet'
+        self.property_type = "shortlet"
 
         embedding = self.generate_embedding()
         if embedding:
@@ -626,16 +675,19 @@ class BannedProperty(models.Model):
     """
     BannedProperty model class
     """
+
     id = models.CharField(
         primary_key=True,
         max_length=255,
         default=idx.generate_banned_property_id,
-        editable=False
+        editable=False,
     )
     property = models.OneToOneField(
-        Property, related_name="banned", on_delete=models.CASCADE)
+        Property, related_name="banned", on_delete=models.CASCADE
+    )
     banned_by = models.ForeignKey(
-        User, related_name="banned_properties", on_delete=models.CASCADE)
+        User, related_name="banned_properties", on_delete=models.CASCADE
+    )
     reason = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -653,25 +705,30 @@ class VerifiedProperty(models.Model):
     """
     VerifiedProperty model class
     """
+
     VERIFICATION_PHASE_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Phase 1', 'Phase 1'),
-        ('Phase 2', 'Phase 2'),
-        ('Verified', 'Verified'),
-        ('Rejected', 'Rejected'),
+        ("Pending", "Pending"),
+        ("Phase 1", "Phase 1"),
+        ("Phase 2", "Phase 2"),
+        ("Verified", "Verified"),
+        ("Rejected", "Rejected"),
     ]
     id = models.CharField(
         primary_key=True,
         max_length=255,
         default=idx.generate_verified_property_id,
-        editable=False
+        editable=False,
     )
     property = models.OneToOneField(
-        Property, related_name="verified", on_delete=models.CASCADE)
+        Property, related_name="verified", on_delete=models.CASCADE
+    )
     verified_by = models.ForeignKey(
-        User, related_name="verified_properties", on_delete=models.CASCADE)
+        User, related_name="verified_properties", on_delete=models.CASCADE, null=True
+    )
+    is_auto_verified = models.BooleanField(default=False)
     verification_phase = models.CharField(
-        max_length=50, choices=VERIFICATION_PHASE_CHOICES, default='Pending')
+        max_length=50, choices=VERIFICATION_PHASE_CHOICES, default="Pending"
+    )
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -688,23 +745,37 @@ class VerifiedProperty(models.Model):
         """
         Check if the property is fully verified.
         """
-        return self.verification_phase == 'Verified'
+        return self.verification_phase == "Verified" or self.is_auto_verified
+
+    def save(self, *args, **kwargs):
+        # One of is_auto_verified or verified_by should be set
+        if not self.is_auto_verified and not self.verified_by:
+            raise ValidationError(
+                "One of is_auto_verified or verified_by should be set"
+            )
+        if self.is_auto_verified:
+            self.verification_phase = "Verified"
+            self.notes = "Your property is automatically verified since your host account is verified."
+        return super().save(*args, **kwargs)
 
 
 class BookmarkedProperty(models.Model):
     """
     BookmarkedProperty model class
     """
+
     id = models.CharField(
         primary_key=True,
         max_length=255,
         default=idx.generate_bookmarked_property_id,
-        editable=False
+        editable=False,
     )
     property = models.ForeignKey(
-        Property, related_name="bookmarked_properties", on_delete=models.CASCADE)
+        Property, related_name="bookmarked_properties", on_delete=models.CASCADE
+    )
     user = models.ForeignKey(
-        User, related_name="bookmarked_properties", on_delete=models.CASCADE)
+        User, related_name="bookmarked_properties", on_delete=models.CASCADE
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -720,18 +791,26 @@ class InterestedProperty(models.Model):
     """
     InterestedProperty model class
     """
+
     id = models.CharField(
         primary_key=True,
         max_length=255,
         default=idx.generate_interested_property_id,
-        editable=False
+        editable=False,
     )
     property = models.ForeignKey(
-        Property, related_name="interested_properties", on_delete=models.CASCADE)
+        Property, related_name="interested_properties", on_delete=models.CASCADE
+    )
     user = models.ForeignKey(
-        User, related_name="interested_properties", on_delete=models.CASCADE)
+        User, related_name="interested_properties", on_delete=models.CASCADE
+    )
     responder = models.ForeignKey(
-        User, related_name="responded_interested_properties", on_delete=models.SET_NULL, null=True, blank=True)
+        User,
+        related_name="responded_interested_properties",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -747,23 +826,30 @@ class InterestedProperty(models.Model):
         """
         Get the owner of the property.
         """
-        return self.property.listed_by.user if self.property and self.property.listed_by else None
+        return (
+            self.property.listed_by.user
+            if self.property and self.property.listed_by
+            else None
+        )
 
 
 class InterestedPropertyDialog(models.Model):
     """
     InterestedPropertyDialog model class
     """
+
     id = models.CharField(
         primary_key=True,
         max_length=255,
         default=idx.generate_interested_property_dialogue_id,
-        editable=False
+        editable=False,
     )
     interested_property = models.ForeignKey(
-        InterestedProperty, related_name="dialogs", on_delete=models.CASCADE)
+        InterestedProperty, related_name="dialogs", on_delete=models.CASCADE
+    )
     sender = models.ForeignKey(
-        User, related_name="sent_interested_property_dialogs", on_delete=models.CASCADE)
+        User, related_name="sent_interested_property_dialogs", on_delete=models.CASCADE
+    )
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
