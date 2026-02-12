@@ -99,6 +99,7 @@ class DrfApi(Construct):
             num_cache_clusters=1,
             cache_subnet_group_name=cache_subnet_group.ref,
             security_group_ids=[cache_sg.security_group_id],
+            replication_group_description="DRF API Cache",
             port=6379,
         )
         user_data = ec2.UserData.for_linux()
