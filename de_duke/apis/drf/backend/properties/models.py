@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+import builtins
 from django.contrib.gis.db.models import PointField
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
@@ -857,3 +858,69 @@ class InterestedPropertyDialog(models.Model):
         verbose_name = "Interested Property Dialog"
         verbose_name_plural = "Interested Property Dialogs"
         ordering = ["created_at"]
+
+
+class PropertyChat(models.Model):
+    """
+    PropertyChat model class
+    """
+
+    id = models.CharField(
+        primary_key=True,
+        max_length=255,
+        default=idx.generate_property_chat_id,
+        editable=False,
+    )
+    property = models.ForeignKey(
+        Property, related_name="chats", on_delete=models.CASCADE
+    )
+    client = models.ForeignKey(User, related_name="chats", on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Property Chat"
+        verbose_name_plural = "Property Chats"
+        ordering = ["-updated_at"]
+        # Constraint: A property with same client can only have one chat
+        constraints = [
+            models.UniqueConstraint(
+                fields=["property", "client"],
+                name="unique_property_client_chat",
+                violation_error_message="You already have a chat with this property",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.property.__str__()} - {self.client.__str__()}"
+
+    @builtins.property
+    def host(self):
+        return self.property.listed_by.user
+
+
+class PropertyChatMessage(models.Model):
+    """
+    PropertyChatMessage model class
+    """
+
+    id = models.CharField(
+        primary_key=True,
+        max_length=255,
+        default=idx.generate_property_chat_message_id,
+        editable=False,
+    )
+    chat = models.ForeignKey(
+        PropertyChat, related_name="messages", on_delete=models.CASCADE
+    )
+    sender = models.ForeignKey(
+        User, related_name="property_chat_messages", on_delete=models.CASCADE
+    )
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Property Chat Message"
+        verbose_name_plural = "Property Chat Messages"
+        ordering = ["updated_at"]

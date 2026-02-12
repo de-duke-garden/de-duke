@@ -225,3 +225,15 @@ class InterestedPropertyAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         # InterestedProperty should not be changed via admin
         return False
+
+
+class PropertyChatMessageInline(admin.StackedInline):
+    model = models.PropertyChatMessage
+    extra = 0
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(models.PropertyChat)
+class PropertyChatAdmin(admin.ModelAdmin):
+    readonly_fields = ("created_at", "updated_at")
+    inlines = [PropertyChatMessageInline]

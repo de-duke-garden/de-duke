@@ -146,3 +146,13 @@ REST_FRAMEWORK = {
 COGNITO_AWS_REGION = os.getenv("AWS_REGION")
 COGNITO_USER_POOL = os.getenv("COGNITO_USER_POOL")
 COGNITO_AUDIENCE = os.getenv("COGNITO_AUDIENCE")
+
+# Channels settings
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}

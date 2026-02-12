@@ -348,3 +348,44 @@ class InterestedPropertySerializer(serializers.ModelSerializer):
             "property",
             "dialogs",
         ]
+
+
+class PropertyChatMessageSerializer(serializers.ModelSerializer):
+    """
+    Serializer for PropertyChatMessage model.
+    It includes fields for the message and the chat it belongs to.
+    """
+
+    class Meta:
+        model = models.PropertyChatMessage
+        fields = [
+            "id",
+            "chat",
+            "sender",
+            "message",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "sender", "created_at", "updated_at"]
+
+
+class PropertyChatSerializer(serializers.ModelSerializer):
+    """
+    Serializer for PropertyChat model.
+    It includes fields for the chat and its messages.
+    """
+
+    property = MinimalPropertySerializer(read_only=True)
+    messages = PropertyChatMessageSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = models.PropertyChat
+        fields = [
+            "id",
+            "property_id",
+            "property",
+            "client_id",
+            "created_at",
+            "messages",
+        ]
+        read_only_fields = ["id", "client_id", "created_at", "messages"]
