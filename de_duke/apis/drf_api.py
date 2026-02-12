@@ -96,7 +96,7 @@ class DrfApi(Construct):
             "CacheCluster",
             engine="valkey",
             cache_node_type="cache.t4g.micro",
-            num_cache_clusters=1,
+            num_cache_clusters=2,
             cache_subnet_group_name=cache_subnet_group.ref,
             security_group_ids=[cache_sg.security_group_id],
             replication_group_description="DRF API Cache",
