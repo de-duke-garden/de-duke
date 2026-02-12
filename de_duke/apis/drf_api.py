@@ -9,6 +9,7 @@ from aws_cdk import (
     aws_route53 as route53,
     aws_route53_targets as route53_targets,
     aws_s3 as s3,
+    aws_elasticache as elasticache,
     Aws,
     Duration,
     CfnOutput,
@@ -77,7 +78,29 @@ class DrfApi(Construct):
                 )
             ],
         )
-
+        cache_sg = ec2.SecurityGroup(
+            self,
+            "CacheSecurityGroup",
+            vpc=config["shared"].vpc,
+            allow_all_outbound=True,
+            description="Security group for cache",
+        )
+        cache_subnet_group = elasticache.CfnSubnetGroup(
+            self,
+            "CacheSubnetGroup",
+            subnet_ids=[s.subnet_id for s in config["shared"].vpc.public_subnets],
+            description="Subnet group for cache",
+        )
+        cache = elasticache.CfnCacheCluster(
+            self,
+            "CacheCluster",
+            engine="valkey",
+            cache_node_type="cache.t4g.micro",
+            num_cache_nodes=1,
+            cache_subnet_group_name=cache_subnet_group.ref,
+            security_group_ids=[cache_sg.security_group_id],
+            port=6379,
+        )
         user_data = ec2.UserData.for_linux()
         user_data.add_commands(
             "sudo yum update -y",
@@ -103,6 +126,7 @@ GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
 DJANGO_SETTINGS_MODULE=main.settings.aws
 MEDIA_STORAGE_BUCKET_NAME={media_storage.bucket_name}
 STATIC_STORAGE_BUCKET_NAME={static_storage.bucket_name}
+REDIS_ENDPOINT={cache.attr_redis_endpoint_address}
 {
                 "\n".join(
                     [

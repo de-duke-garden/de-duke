@@ -35,32 +35,46 @@ async def greetings(self: AsyncWebsocketActionConsumer, payload: Payload):
 @consumer.action
 async def create_chat(self: AsyncWebsocketActionConsumer, payload: Payload):
     def process():
-        property_id = payload.data.get("property_id")
-        if not property_id:
-            return Payload.error("Property ID is required")
-        print("Property ids: ", Property.objects.all().values_list("id", flat=True))
-        if not Property.objects.filter(id=property_id).exists():
+        property_ = payload.data.get("property")
+        if not property_:
+            return Payload.error("Property is required")
+
+        try:
+            property_instance = Property.objects.get(id=property_)
+        except Property.DoesNotExist:
             return Payload.error("Property not found")
 
-        client_id = self.scope["user"].id
-        request = build_request_from_scope(self.scope)
+        # Validate property
+        if not property_instance.is_verified():
+            return Payload.error("Property is not verified")
+        if not property_instance.is_active:
+            return Payload.error("Property is not active")
+        if property_instance.is_banned():
+            return Payload.error("Property is banned")
+
+        client = self.scope["user"]
+
+        # Get or create chat
         chat, created = PropertyChat.objects.get_or_create(
-            property_id=property_id,
-            client_id=client_id,
+            property=property_instance,
+            client=client,
         )
+
         if created:
             PropertyChatMessage.objects.create(
                 chat=chat,
-                sender_id=client_id,
+                sender=client,
                 message="Hello, I am interested in this property.",
             )
+
+        request = build_request_from_scope(self.scope)
         serializer = PropertyChatSerializer(chat, context={"request": request})
-        payload.data = {"chat": serializer.data, "created": created}
+        payload.data = serializer.data
         return payload, get_chat_recipients(chat.id)
 
     payload, recipients = await sync_to_async(process)()
     for recipient in recipients:
-        print("Sending to: ", recipient)
+        # print("Sending to: ", recipient)
         await self.send_group_payload(payload, recipient)
 
 
@@ -83,10 +97,10 @@ async def get_chats(self: AsyncWebsocketActionConsumer, payload: Payload):
 @consumer.action
 async def create_chat_message(self: AsyncWebsocketActionConsumer, payload):
     def process():
-        sender_id = self.scope["user"].id
+        sender = self.scope["user"]
         serializer = PropertyChatMessageSerializer(data=payload.data)
         if serializer.is_valid():
-            serializer.save(sender_id=sender_id)
+            serializer.save(sender=sender)
             payload.data = serializer.data
             return payload, get_chat_message_recipients(payload.data["id"])
         return Payload.error(serializer.errors), []

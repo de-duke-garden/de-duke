@@ -41,7 +41,7 @@ STORAGES = {
             "bucket_name": STATIC_STORAGE_BUCKET_NAME,
             "region_name": STORAGE_REGION,
         },
-    }
+    },
 }
 MEDIA_URL = f"https://{MEDIA_STORAGE_BUCKET_NAME}.s3.{STORAGE_REGION}://"
 STATIC_URL = f"https://{STATIC_STORAGE_BUCKET_NAME}.s3.{STORAGE_REGION}://"
@@ -148,11 +148,12 @@ COGNITO_USER_POOL = os.getenv("COGNITO_USER_POOL")
 COGNITO_AUDIENCE = os.getenv("COGNITO_AUDIENCE")
 
 # Channels settings
+REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis", 6379)],
+            "hosts": [(f"rediss://{REDIS_ENDPOINT}", 6379)],
         },
     },
 }
