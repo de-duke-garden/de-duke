@@ -98,7 +98,7 @@ class DrfApi(Construct):
             cache_node_type="cache.t4g.micro",
             num_cache_nodes=1,
             cache_subnet_group_name=cache_subnet_group.ref,
-            security_group_ids=[cache_sg.security_group_id],
+            vpc_security_group_ids=[cache_sg.security_group_id],
             port=6379,
         )
         user_data = ec2.UserData.for_linux()
