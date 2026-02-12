@@ -91,14 +91,14 @@ class DrfApi(Construct):
             subnet_ids=[s.subnet_id for s in config["shared"].vpc.public_subnets],
             description="Subnet group for cache",
         )
-        cache = elasticache.CfnCacheCluster(
+        cache = elasticache.CfnReplicationGroup(
             self,
             "CacheCluster",
             engine="valkey",
             cache_node_type="cache.t4g.micro",
-            num_cache_nodes=1,
+            num_cache_clusters=1,
             cache_subnet_group_name=cache_subnet_group.ref,
-            vpc_security_group_ids=[cache_sg.security_group_id],
+            security_group_ids=[cache_sg.security_group_id],
             port=6379,
         )
         user_data = ec2.UserData.for_linux()
@@ -126,7 +126,7 @@ GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
 DJANGO_SETTINGS_MODULE=main.settings.aws
 MEDIA_STORAGE_BUCKET_NAME={media_storage.bucket_name}
 STATIC_STORAGE_BUCKET_NAME={static_storage.bucket_name}
-REDIS_ENDPOINT={cache.attr_redis_endpoint_address}
+REDIS_ENDPOINT={cache.attr_primary_end_point_address}
 {
                 "\n".join(
                     [
