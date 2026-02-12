@@ -7,44 +7,31 @@ For more information on this file, see
 https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
 """
 
-from properties.routing import websocket_urlpatterns
 import os
 
-from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.security.websocket import AllowedHostsOriginValidator
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'main.settings.dev')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "main.settings.dev")
 
+# Initialize Django ASGI application early to ensure the AppRegistry
+# is populated before importing code that may import ORM models.
 django_asgi_app = get_asgi_application()
 
-
-application = ProtocolTypeRouter({
-    "http": django_asgi_app,
-    # "websocket": AllowedHostsOriginValidator(
-    #     AuthMiddlewareStack(URLRouter(websocket_urlpatterns))
-    # ),
-    "websocket": AuthMiddlewareStack(URLRouter(websocket_urlpatterns))
-})
+from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402
+from django.urls import re_path  # noqa: E402
+from .middleware import TokenAuthMiddlewareStack  # noqa: E402
+from properties.consumers import consumer as properties_consumer  # noqa: E402
 
 
-# class HeaderLoggingMiddleware:
-#     def __init__(self, app):
-#         self.app = app
-
-#     async def __call__(self, scope, receive, send):
-#         if scope.get("type") == "websocket":
-#             headers = {k.decode(): v.decode() for k, v in scope.get("headers", [])}
-#             print("ASGI websocket headers:", headers)   # check Host / Origin here
-#         return await self.app(scope, receive, send)
-
-# inner = ProtocolTypeRouter({
-#     "http": django_asgi_app,
-#     "websocket": AllowedHostsOriginValidator(
-#         AuthMiddlewareStack(URLRouter(websocket_urlpatterns))
-#     ),
-# })
-
-# # add header logging around the whole application (optional)
-# application = HeaderLoggingMiddleware(inner)
+application = ProtocolTypeRouter(
+    {
+        "http": django_asgi_app,
+        "websocket": TokenAuthMiddlewareStack(
+            URLRouter(
+                [
+                    re_path(r"ws/properties/", properties_consumer.as_asgi()),
+                ]
+            )
+        ),
+    }
+)

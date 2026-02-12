@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from accounts.models import HostAccount
 from . import models
+from accounts.serializers import UserSerializer
 
 
 class PropertyImageSerializer(serializers.ModelSerializer):
@@ -348,3 +349,73 @@ class InterestedPropertySerializer(serializers.ModelSerializer):
             "property",
             "dialogs",
         ]
+
+
+class PropertyChatMessageSerializer(serializers.ModelSerializer):
+    """
+    Serializer for PropertyChatMessage model.
+    It includes fields for the message and the chat it belongs to.
+    """
+
+    sender = UserSerializer(read_only=True)
+
+    class Meta:
+        model = models.PropertyChatMessage
+        fields = [
+            "id",
+            "chat",
+            "sender",
+            "message",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "sender", "created_at", "updated_at"]
+
+
+class PropertyChatSerializer(serializers.ModelSerializer):
+    """
+    Serializer for PropertyChat model.
+    It includes fields for the chat and its messages.
+    """
+
+    property = PropertySerializer(read_only=True)
+    messages = PropertyChatMessageSerializer(read_only=True, many=True)
+    client = UserSerializer(read_only=True)
+    host = UserSerializer(read_only=True)
+
+    class Meta:
+        model = models.PropertyChat
+        fields = [
+            "id",
+            "property",
+            "client",
+            "host",
+            "messages",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "property",
+            "client",
+            "host",
+            "messages",
+            "created_at",
+            "updated_at",
+        ]
+
+    def validate_property(self, value):
+        property = models.Property.objects.filter(id=value)
+        # if property does not exists
+        if not property.exists():
+            raise serializers.ValidationError("Property not found")
+        # if property is not verified
+        if not property.first().is_verified():
+            raise serializers.ValidationError("Property is not verified")
+        # if property is not active
+        if not property.first().is_active:
+            raise serializers.ValidationError("Property is not active")
+        # if property is banned
+        if property.first().is_banned():
+            raise serializers.ValidationError("Property is banned")
+        return value

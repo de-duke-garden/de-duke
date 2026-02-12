@@ -49,6 +49,14 @@ services:
       - ./traefik/dev/dynamic:/etc/traefik/dynamic:ro
     depends_on:
       - backend
+  redis:
+    image: redis:alpine
+    container_name: deduke-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
 
   # embed:
   #   build:
@@ -67,6 +75,7 @@ services:
 
 volumes:
   db-data:
+  redis-data:
 secrets:
   db-password:
     file: .secrets/db-password-dev.txt

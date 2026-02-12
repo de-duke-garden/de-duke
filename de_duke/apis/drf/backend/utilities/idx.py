@@ -2,61 +2,85 @@ import uuid
 
 
 def generate_checkout_id():
-    '''Generate a unique checkout ID'''
+    """Generate a unique checkout ID"""
     return "chk_" + uuid.uuid4().hex
 
+
 def generate_payment_id():
-    '''Generate a unique payment ID'''
+    """Generate a unique payment ID"""
     return "pay_" + uuid.uuid4().hex
 
+
 def generate_user_id():
-    '''Generate a unique user ID'''
+    """Generate a unique user ID"""
     return "usr_" + uuid.uuid4().hex
 
+
 def generate_otp_id():
-    '''Generate a unique OTP ID'''
+    """Generate a unique OTP ID"""
     return "otp_" + uuid.uuid4().hex
 
+
 def generate_phone_number_id():
-    '''Generate a unique Phone Number ID'''
+    """Generate a unique Phone Number ID"""
     return "phn_" + uuid.uuid4().hex
 
+
 def generate_host_id():
-    '''Generate a unique Host ID'''
+    """Generate a unique Host ID"""
     return "hst_" + uuid.uuid4().hex
 
+
 def generate_property_id():
-    '''Generate a unique Property ID'''
+    """Generate a unique Property ID"""
     return "prp_" + uuid.uuid4().hex
 
+
 def generate_property_image_id():
-    '''Generate a unique Property Image ID'''
+    """Generate a unique Property Image ID"""
     return "pim_" + uuid.uuid4().hex
 
+
 def generate_property_media_id():
-    '''Generate a unique Property Media ID'''
+    """Generate a unique Property Media ID"""
     return "pmd_" + uuid.uuid4().hex
 
+
 def generate_property_room_id():
-    '''Generate a unique Property Room ID'''
+    """Generate a unique Property Room ID"""
     return "pro_" + uuid.uuid4().hex
 
+
 def generate_banned_property_id():
-    '''Generate a unique Banned Property ID'''
+    """Generate a unique Banned Property ID"""
     return "bpr_" + uuid.uuid4().hex
 
+
 def generate_verified_property_id():
-    '''Generate a unique Verified Property ID'''
+    """Generate a unique Verified Property ID"""
     return "vpr_" + uuid.uuid4().hex
 
+
 def generate_bookmarked_property_id():
-    '''Generate a unique Bookmarked Property ID'''
+    """Generate a unique Bookmarked Property ID"""
     return "bkp_" + uuid.uuid4().hex
 
+
 def generate_interested_property_id():
-    '''Generate a unique Interested Property ID'''
+    """Generate a unique Interested Property ID"""
     return "ipr_" + uuid.uuid4().hex
 
+
 def generate_interested_property_dialogue_id():
-    '''Generate a unique Interested Property Dialogue ID'''
+    """Generate a unique Interested Property Dialogue ID"""
     return "ipd_" + uuid.uuid4().hex
+
+
+def generate_property_chat_id():
+    """Generate a unique Property Chat ID"""
+    return "prc_" + uuid.uuid4().hex
+
+
+def generate_property_chat_message_id():
+    """Generate a unique Property Chat Message ID"""
+    return "prm_" + uuid.uuid4().hex
