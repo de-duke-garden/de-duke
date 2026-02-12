@@ -209,3 +209,6 @@ EOF
         )
 
         CfnOutput(self, "AutoScalingGroupName", value=asg.auto_scaling_group_name)
+        CfnOutput(self, "LoadBalancerDnsName", value=lb.load_balancer_dns_name)
+        CfnOutput(self, "RedisEndpoint", value=cache.attr_primary_end_point_address)
+        CfnOutput(self, "RedisPort", value=cache.attr_primary_end_point_port)
