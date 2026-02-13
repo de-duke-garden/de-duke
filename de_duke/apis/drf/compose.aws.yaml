@@ -23,3 +23,11 @@ services:
       - ./traefik/aws/dynamic:/etc/traefik/dynamic:ro
     depends_on:
       - backend
+  redis:
+    image: redis:alpine
+    container_name: deduke-redis-aws
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
