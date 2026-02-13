@@ -102,7 +102,7 @@ class DrfApi(Construct):
             security_group_ids=[cache_sg.security_group_id],
             replication_group_description="DRF API Cache",
             port=6379,
-            transit_encryption_enabled=True,
+            transit_encryption_enabled=False,
         )
         user_data = ec2.UserData.for_linux()
         user_data.add_commands(
