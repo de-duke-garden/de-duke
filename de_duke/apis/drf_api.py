@@ -85,6 +85,7 @@ class DrfApi(Construct):
             allow_all_outbound=True,
             description="Security group for cache",
         )
+        cache_sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(6379))
         cache_subnet_group = elasticache.CfnSubnetGroup(
             self,
             "CacheSubnetGroup",
