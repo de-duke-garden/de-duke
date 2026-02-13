@@ -151,7 +151,7 @@ COGNITO_AUDIENCE = os.getenv("COGNITO_AUDIENCE")
 REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.pubsub.RedisPubSubChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [f"redis://{REDIS_ENDPOINT}:6379"],
         },
