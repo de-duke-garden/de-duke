@@ -179,6 +179,7 @@ EOF
             "LoadBalancer",
             vpc=config["shared"].vpc,
             internet_facing=True,
+            idle_timeout=Duration.days(1),
         )
 
         route53.ARecord(
