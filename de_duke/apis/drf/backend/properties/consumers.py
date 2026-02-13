@@ -33,6 +33,12 @@ async def greetings(self: AsyncWebsocketActionConsumer, payload: Payload):
 
 
 @consumer.action
+async def ping(self: AsyncWebsocketActionConsumer, payload: Payload):
+    payload.data = {"message": "pong"}
+    await self.send_payload(payload)
+
+
+@consumer.action
 async def create_chat(self: AsyncWebsocketActionConsumer, payload: Payload):
     def process():
         property_ = payload.data.get("property")
