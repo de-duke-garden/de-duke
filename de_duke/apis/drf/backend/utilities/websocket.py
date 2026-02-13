@@ -60,6 +60,9 @@ class AsyncWebsocketActionConsumer(AsyncWebsocketConsumer):
         except json.JSONDecodeError:
             await self.send_payload(Payload.error("Invalid JSON format"))
             return
+        except Exception as e:
+            await self.send_payload(Payload.error(str(e)))
+            return
 
         actions = getattr(self, "actions", {})
         if payload.action in actions and not payload.action.startswith("$"):
