@@ -156,7 +156,9 @@ EOF
                 ec2.InstanceSize.MEDIUM,
             ),
             vpc=config["shared"].vpc,
-            machine_image=ec2.MachineImage.latest_amazon_linux2023(),
+            machine_image=ec2.MachineImage.latest_amazon_linux2023(
+                cpu_type=ec2.AmazonLinuxCpuType.ARM_64
+            ),
             update_policy=autoscaling.UpdatePolicy.replacing_update(),
             user_data=user_data,
             min_capacity=1,
