@@ -28,7 +28,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
+          check-latest: true
 
       - name: Install AWS CDK
         run: npm install -g aws-cdk
@@ -43,8 +44,7 @@ jobs:
 
       - name: Synthesize CDK stack
         run: cdk synth
-      
+
       - name: View Tree of CDK Synth Output
         if: failure()
         run: tree cdk.out /F
-        
