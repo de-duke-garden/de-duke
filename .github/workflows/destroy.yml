@@ -29,13 +29,14 @@ jobs:
           python-version: "3.12"
           check-latest: true
 
+      - name: Install and Update Hatch
+        run: |
+          python -m pip install --upgrade pip virtualenv hatch
+          # Force Hatch to recreate the default env if it exists
+          hatch env remove default || true
+
       - name: Install AWS CDK
         run: npm install -g aws-cdk
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install hatch
 
       - name: Destroy CDK stack
         run: cdk destroy --force
