@@ -6,6 +6,11 @@ def generate_checkout_id():
     return "chk_" + uuid.uuid4().hex
 
 
+def generate_invoice_id():
+    """Generate a unique invoice ID"""
+    return "inv_" + uuid.uuid4().hex
+
+
 def generate_payment_id():
     """Generate a unique payment ID"""
     return "pay_" + uuid.uuid4().hex

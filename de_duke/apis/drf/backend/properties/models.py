@@ -17,7 +17,8 @@ from utilities.helpers import (
 )
 from utilities import idx
 from .utility import text_to_embedding
-
+from payments import models as payment_models
+from django.utils import timezone
 
 logger = logging.getLogger("django")
 
@@ -200,6 +201,38 @@ class Property(models.Model):
         if first_image:
             return first_image.image
         return None
+
+    @property
+    def possession_period_days(self) -> int | None:
+        """
+        Get the possession period days of the property based on its type.
+        """
+        if self.property_type == "commercial":
+            commercial = getattr(self, "commercialproperty", None)
+            if commercial:
+                return commercial.possession_period_days
+        elif self.property_type == "shortlet":
+            shortlet = getattr(self, "shortletproperty", None)
+            if shortlet:
+                return shortlet.possession_period_days
+        return None
+
+    @property
+    def is_open_for_invoice(self):
+        """
+        Check if the property is open for invoice.
+        """
+        last_sealed_invoice = payment_models.PropertyChatInvoice.objects.filter(
+            property_chat__property=self, is_sealed=True
+        ).last()
+        if last_sealed_invoice:
+            # Check if last sealed invoice is paid and possession_period_end_date has passed
+            if (
+                last_sealed_invoice.is_paid
+                and last_sealed_invoice.possession_period_end_date > timezone.now()
+            ):
+                return False
+        return True
 
     def save(self, *args, **kwargs):
         # Check if the user is a verified host
@@ -877,6 +910,7 @@ class PropertyChat(models.Model):
     client = models.ForeignKey(User, related_name="chats", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    allow_payment = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Property Chat"
@@ -890,6 +924,13 @@ class PropertyChat(models.Model):
                 violation_error_message="You already have a chat with this property",
             )
         ]
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            old_inst = PropertyChat.objects.get(pk=self.pk)
+            if not old_inst.property.is_open_for_invoice:
+                raise ValidationError("Property is not open for invoice")
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.property.__str__()} - {self.client.__str__()}"

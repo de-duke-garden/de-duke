@@ -28,23 +28,27 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
+          check-latest: true
+
+      - name: Install and Update Hatch
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "virtualenv==20.36.1"
+          python -m pip install "hatch==1.16.2"
+          # Force Hatch to recreate the default env if it exists
+          hatch env remove default || true
+          hatch env create default
 
       - name: Install AWS CDK
         run: npm install -g aws-cdk
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install hatch
 
       - name: Check docker status
         run: docker info
 
       - name: Synthesize CDK stack
         run: cdk synth
-      
+
       - name: View Tree of CDK Synth Output
         if: failure()
         run: tree cdk.out /F
-        
