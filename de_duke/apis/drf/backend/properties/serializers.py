@@ -2,6 +2,7 @@ from rest_framework import serializers
 from accounts.models import HostAccount
 from . import models
 from accounts.serializers import UserSerializer
+from payments.serializers import PropertyChatInvoiceSerializer
 
 
 class PropertyImageSerializer(serializers.ModelSerializer):
@@ -382,6 +383,9 @@ class PropertyChatSerializer(serializers.ModelSerializer):
     messages = PropertyChatMessageSerializer(read_only=True, many=True)
     client = UserSerializer(read_only=True)
     host = UserSerializer(read_only=True)
+    invoices = PropertyChatInvoiceSerializer(
+        read_only=True, many=True, source="property_chat_invoices"
+    )
 
     class Meta:
         model = models.PropertyChat
@@ -391,6 +395,8 @@ class PropertyChatSerializer(serializers.ModelSerializer):
             "client",
             "host",
             "messages",
+            "invoices",
+            "allow_payment",
             "created_at",
             "updated_at",
         ]
@@ -400,6 +406,7 @@ class PropertyChatSerializer(serializers.ModelSerializer):
             "client",
             "host",
             "messages",
+            "invoices",
             "created_at",
             "updated_at",
         ]
