@@ -36,6 +36,7 @@ jobs:
           python -m pip install --upgrade pip virtualenv hatch
           # Force Hatch to recreate the default env if it exists
           hatch env remove default || true
+          hatch env create default
 
       - name: Install AWS CDK
         run: npm install -g aws-cdk
