@@ -95,18 +95,21 @@ def create_property_chat_invoice_paystack_payment_link(
     """
     Create a Paystack payment access code for a property chat invoice.
     """
+    metadata = {
+        "invoice_id": str(property_chat_invoice.id),
+        "property_id": str(property_chat_invoice.property_chat.property.id),
+        "user_id": str(property_chat_invoice.property_chat.client.id),
+        "possession_period_start_date": property_chat_invoice.possession_period_start_date.isoformat(),
+    }
+    if property_chat_invoice.possession_period_end_date:
+        metadata["possession_period_end_date"] = (
+            property_chat_invoice.possession_period_end_date.isoformat()
+        )
     transaction = paystack.Transaction.initialize(
         amount=property_chat_invoice.unit_amount,
         currency=property_chat_invoice.currency,
         email=property_chat_invoice.property_chat.client.email,
-        # reference=property_chat_invoice.id,
-        metadata={
-            "invoice_id": str(property_chat_invoice.id),
-            "property_id": str(property_chat_invoice.property_chat.property.id),
-            "user_id": str(property_chat_invoice.property_chat.client.id),
-            "possession_period_start_date": property_chat_invoice.possession_period_start_date.isoformat(),
-            "possession_period_end_date": property_chat_invoice.possession_period_end_date.isoformat(),
-        },
+        metadata=metadata,
     )
     print("Transaction: ", transaction, transaction.data)
     return transaction.data["authorization_url"]
