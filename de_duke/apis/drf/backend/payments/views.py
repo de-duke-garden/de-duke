@@ -6,6 +6,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import permissions
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.request import Request
+import json
 import hmac
 import hashlib
 from django.conf import settings
@@ -189,8 +190,9 @@ class PaystackPaymentViewSet(viewsets.ViewSet):
             #         "plan": {}
             #     }
             # }
-            event = payload.get("event")
-            data = payload.get("data")
+            payload_data = json.loads(payload)
+            event = payload_data.get("event")
+            data = payload_data.get("data")
             if event == "charge.success":
                 invoice = PropertyChatInvoice.objects.get(
                     id=data["metadata"]["invoice_id"]
@@ -337,16 +339,18 @@ class PaymentsViewSet(viewsets.ViewSet):
             #         "plan": {}
             #     }
             # }
-            event = payload.get("event")
-            data = payload.get("data")
+            payload_data = json.loads(payload)
+            event = payload_data.get("event")
+            data = payload_data.get("data")
             if event == "charge.success":
                 invoice = PropertyChatInvoice.objects.get(
                     id=data["metadata"]["invoice_id"]
                 )
-                invoice.status = "successful"
-                invoice.save()
                 invoice.property_chat.allow_payment = False
                 invoice.property_chat.save()
+                invoice.status = "successful"
+                invoice.reference = data["reference"]
+                invoice.save()
                 channel_layer = get_channel_layer()
                 ws_payload = Payload(
                     action="payment_success",
@@ -364,6 +368,14 @@ class PaymentsViewSet(viewsets.ViewSet):
                             "payload": ws_payload.to_json(),
                         },
                     )
+                return Response(
+                    {"message": "Webhook processed successfully."},
+                    status=status.HTTP_200_OK,
+                )
+            return Response(
+                {"message": "Webhook not processed successfully."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         else:
             # Signature is invalid, reject the request
             print("Invalid signature.")

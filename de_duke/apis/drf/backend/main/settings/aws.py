@@ -105,8 +105,6 @@ try:
             MAP_WIDGETS["GoogleMap"]["apiKey"] = GOOGLE_MAP_API_KEY  # noqa: F405
         PAYSTACK_PUBLIC_KEY = secret_dict.get("paystackPublicKey")
         PAYSTACK_SECRET_KEY = secret_dict.get("paystackSecretKey")
-        PAYSTACK_WEBHOOK_URL = secret_dict.get("paystackWebhookUrl")
-        PAYSTACK_REDIRECT_URL = secret_dict.get("paystackRedirectUrl")
 except Exception as e:
     print(f"Error retrieving map API key: {e}")
 
