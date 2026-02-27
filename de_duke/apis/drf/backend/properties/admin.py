@@ -216,24 +216,50 @@ class VerifiedPropertyAdmin(admin.ModelAdmin):
         return super().save_model(request, obj, form, change)
 
 
-@admin.register(models.InterestedProperty)
-class InterestedPropertyAdmin(admin.ModelAdmin):
-    def has_add_permission(self, request):
-        # InterestedProperty should not be added via admin
-        return False
+# @admin.register(models.InterestedProperty)
+# class InterestedPropertyAdmin(admin.ModelAdmin):
+#     def has_add_permission(self, request):
+#         # InterestedProperty should not be added via admin
+#         return False
 
-    def has_change_permission(self, request, obj=None):
-        # InterestedProperty should not be changed via admin
-        return False
+#     def has_change_permission(self, request, obj=None):
+#         # InterestedProperty should not be changed via admin
+#         return False
 
 
 class PropertyChatMessageInline(admin.StackedInline):
     model = models.PropertyChatMessage
     extra = 0
-    readonly_fields = ("created_at", "updated_at")
+
+    def get_readonly_fields(self, request, obj=None):
+        return [f.name for f in self.model._meta.fields]
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(models.PropertyChat)
 class PropertyChatAdmin(admin.ModelAdmin):
-    readonly_fields = ("created_at", "updated_at")
     inlines = [PropertyChatMessageInline]
+
+    list_display = (
+        "client__email",
+        "host",
+        "property__address",
+        "allow_payment",
+    )
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = [f.name for f in self.model._meta.fields]
+        fields.remove("allow_payment")
+        return fields
+
+    def has_add_permission(self, request):
+        return False
+
+    # TODO: uncomment later
+    # def has_delete_permission(self, request, obj=None):
+    #     return False

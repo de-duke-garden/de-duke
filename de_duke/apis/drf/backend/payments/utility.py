@@ -80,7 +80,6 @@ def create_property_flutterwave_payment_link(
 #         currency=checkout.currency,
 #         email=user.email,
 #         reference=checkout.id,
-#         callback_url=settings.PAYSTACK_REDIRECT_URL,
 #         metadata={
 #             "property_id": str(property_instance.id),
 #             "user_id": str(user.id),
@@ -101,7 +100,6 @@ def create_property_chat_invoice_paystack_payment_link(
         currency=property_chat_invoice.currency,
         email=property_chat_invoice.property_chat.client.email,
         # reference=property_chat_invoice.id,
-        callback_url=settings.PAYSTACK_REDIRECT_URL,
         metadata={
             "invoice_id": str(property_chat_invoice.id),
             "property_id": str(property_chat_invoice.property_chat.property.id),

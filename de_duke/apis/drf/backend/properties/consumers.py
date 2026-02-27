@@ -253,14 +253,16 @@ async def seal_invoice(self: AsyncWebsocketActionConsumer, payload):
 async def pay_invoice(self: AsyncWebsocketActionConsumer, payload):
     def process():
         instance = PropertyChatInvoice.objects.get(id=payload.data.get("id"))
+        if not instance.is_sealed:
+            return Payload.error(
+                "Invoice is not sealed. Please contact the host to seal the invoice."
+            )
+        if instance.status != "initiated":
+            return Payload.error("Invoice is already processed")
         payment_link = create_property_chat_invoice_paystack_payment_link(instance)
         payload.data = {"payment_link": payment_link}
         # return payload, get_recipients_by_chat_id(instance.property_chat.id)
         return payload
 
     response_payload = await sync_to_async(process)()
-    # if response_payload.is_error:
     await self.send_payload(response_payload)
-    # else:
-    #     for recipient in recipients:
-    #         await self.send_group_payload(response_payload, recipient)

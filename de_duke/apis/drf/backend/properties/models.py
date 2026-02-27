@@ -930,6 +930,8 @@ class PropertyChat(models.Model):
             old_inst = PropertyChat.objects.get(pk=self.pk)
             if not old_inst.property.is_open_for_invoice:
                 raise ValidationError("Property is not open for invoice")
+        if self._state.adding and self.property.listed_by.user.id == self.client.id:
+            raise ValidationError("You cannot create a chat of your own property")
         return super().save(*args, **kwargs)
 
     def __str__(self):
