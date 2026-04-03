@@ -34,21 +34,21 @@ export default function Footer() {
 
                 {/* Bottom Navigation */}
                 <div className="flex flex-wrap justify-center gap-6 mb-8 text-sm text-gray-600 font-medium">
-                    <Link href="#" className="hover:text-primary">About</Link>
-                    <Link href="#" className="hover:text-primary">Research</Link>
+                    <Link href="/about" className="hover:text-primary">About</Link>
+                    {/* <Link href="#" className="hover:text-primary">Research</Link> */}
                     <Link href="#" className="hover:text-primary">Help</Link>
-                    <Link href="#" className="hover:text-primary">Advertise</Link>
-                    <Link href="#" className="hover:text-primary">Fair Housing Guide</Link>
-                    <Link href="#" className="hover:text-primary">Advocacy</Link>
-                    <Link href="#" className="hover:text-primary">Terms of use</Link>
-                    <Link href="#" className="hover:text-primary">Privacy Notice</Link>
-                    <Link href="#" className="hover:text-primary">Learn</Link>
-                    <Link href="#" className="hover:text-primary">AI</Link>
-                    <Link href="#" className="hover:text-primary">Mobile Apps</Link>
+                    {/* <Link href="#" className="hover:text-primary">Advertise</Link> */}
+                    {/* <Link href="#" className="hover:text-primary">Fair Housing Guide</Link> */}
+                    {/* <Link href="#" className="hover:text-primary">Advocacy</Link> */}
+                    <Link href="/about/terms-of-service" className="hover:text-primary">Terms of service</Link>
+                    <Link href="/about/privacy-policy" className="hover:text-primary">Privacy policy</Link>
+                    {/* <Link href="#" className="hover:text-primary">Learn</Link> */}
+                    {/* <Link href="#" className="hover:text-primary">AI</Link> */}
+                    {/* <Link href="#" className="hover:text-primary">Mobile Apps</Link> */}
                 </div>
 
                 {/* Legal Text */}
-                <div className="text-center text-[10px] text-gray-400 max-w-4xl mx-auto space-y-2 mb-8">
+                <div className="text-center text-xs text-gray-400 max-w-4xl mx-auto space-y-2 mb-8">
                     <p>At De-Duke, we're committed to digital accessibility for all.<br />
                         We're actively working to make our platform inclusive and user-friendly for individuals with disabilities. Your feedback helps us improve.<br />
                         If you encounter an accessibility issue or need specific accommodations, please don't hesitate to <a href="#" className="text-primary hover:underline">reach out</a>.</p>
@@ -58,11 +58,11 @@ export default function Footer() {
 
                 {/* App Badges Bottom */}
                 <div className="flex justify-center space-x-4 mb-4 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-                    <div className="h-8 w-24 bg-gray-200 rounded border border-gray-300 flex items-center justify-center text-[8px]">Google Play</div>
-                    <div className="h-8 w-24 bg-gray-200 rounded border border-gray-300 flex items-center justify-center text-[8px]">App Store</div>
+                    <div className="h-8 w-24 bg-gray-200 rounded border border-gray-300 flex items-center justify-center text-xs">Google Play</div>
+                    <div className="h-8 w-24 bg-gray-200 rounded border border-gray-300 flex items-center justify-center text-xs">App Store</div>
                 </div>
 
-                <div className="text-center text-[10px] text-gray-400">
+                <div className="text-center text-xs text-gray-400">
                     copyright &copy; de-duke.com
                 </div>
             </div>

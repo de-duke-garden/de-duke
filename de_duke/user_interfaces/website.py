@@ -46,31 +46,31 @@ class MyLocalBundler:
             return False
 
 
-class LandingConfig(TypedDict):
+class WebsiteConfig(TypedDict):
     shared: Shared
 
 
-class Landing(Construct):
-    def __init__(self, scope: Construct, id: str, config: LandingConfig) -> None:
+class Website(Construct):
+    def __init__(self, scope: Construct, id: str, config: WebsiteConfig) -> None:
         super().__init__(scope, id)
 
-        landing_domain_name = config["shared"].domain_name
+        website_domain_name = config["shared"].domain_name
 
-        # Create S3 bucket for hosting the landing page
-        landing_bucket = s3.Bucket(
-            self, "LandingBucket",
+        # Create S3 bucket for hosting the website page
+        website_bucket = s3.Bucket(
+            self, "WebsiteBucket",
             removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=True,
         )
 
-        project_path = str(Path(__file__).parent.joinpath("landing").resolve())
+        project_path = str(Path(__file__).parent.joinpath("website").resolve())
 
         # Create CloudFront distribution for the S3 bucket
         distribution = cloudfront.Distribution(
-            self, "LandingDistribution",
+            self, "WebsiteDistribution",
             default_behavior=cloudfront.BehaviorOptions(
                 origin=cloudfront_origins.S3BucketOrigin.with_origin_access_control(
-                    landing_bucket),
+                    website_bucket),
                 viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 cache_policy=cloudfront.CachePolicy.CACHING_OPTIMIZED
             ),
@@ -89,8 +89,8 @@ class Landing(Construct):
                     ttl=Duration.minutes(30)
                 )
             ],
-            comment="CloudFront distribution for De-Duke landing page",
-            domain_names=[landing_domain_name],
+            comment="CloudFront distribution for De-Duke website page",
+            domain_names=[website_domain_name],
             certificate=config["shared"].certificate,
         )
 
@@ -112,29 +112,29 @@ class Landing(Construct):
                     exclude=["**/node_modules/**", "**/.next/**", "**/out/**"],
                 ),
             ],
-            destination_bucket=landing_bucket,
+            destination_bucket=website_bucket,
             distribution=distribution,
             distribution_paths=["/*"],
         )
 
         route53.ARecord(
-            self, "LandingARecord",
+            self, "WebsiteARecord",
             zone=config["shared"].hosted_zone,
-            record_name=landing_domain_name,
+            record_name=website_domain_name,
             target=route53.RecordTarget.from_alias(
                 route53_targets.CloudFrontTarget(distribution)),
         )
         route53.AaaaRecord(
-            self, "LandingAaaaRecord",
+            self, "WebsiteAaaaRecord",
             zone=config["shared"].hosted_zone,
-            record_name=landing_domain_name,
+            record_name=website_domain_name,
             target=route53.RecordTarget.from_alias(
                 route53_targets.CloudFrontTarget(distribution)),
         )
 
         # Output the CloudFront distribution domain name
         CfnOutput(
-            self, "LandingPageURL",
-            value="https://" + landing_domain_name,
-            description="URL of the De-Duke landing page",
+            self, "WebsitePageURL",
+            value="https://" + website_domain_name,
+            description="URL of the De-Duke website page",
         )
