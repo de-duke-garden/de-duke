@@ -67,7 +67,7 @@ class Website(Construct):
 
         # Create CloudFront distribution for the S3 bucket
         distribution = cloudfront.Distribution(
-            self, "WebsiteDistribution",
+            self, "LandingDistribution",
             default_behavior=cloudfront.BehaviorOptions(
                 origin=cloudfront_origins.S3BucketOrigin.with_origin_access_control(
                     website_bucket),
