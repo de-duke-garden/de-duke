@@ -150,7 +150,7 @@ COGNITO_USER_POOL = os.getenv("COGNITO_USER_POOL")
 COGNITO_AUDIENCE = os.getenv("COGNITO_AUDIENCE")
 
 # Channels settings
-REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")
+# REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
