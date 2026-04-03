@@ -78,32 +78,33 @@ class DrfApi(Construct):
                 )
             ],
         )
-        cache_sg = ec2.SecurityGroup(
-            self,
-            "CacheSecurityGroup",
-            vpc=config["shared"].vpc,
-            allow_all_outbound=True,
-            description="Security group for cache",
-        )
-        cache_sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(6379))
-        cache_subnet_group = elasticache.CfnSubnetGroup(
-            self,
-            "CacheSubnetGroup",
-            subnet_ids=[s.subnet_id for s in config["shared"].vpc.public_subnets],
-            description="Subnet group for cache",
-        )
-        cache = elasticache.CfnReplicationGroup(
-            self,
-            "CacheCluster",
-            engine="valkey",
-            cache_node_type="cache.t4g.micro",
-            num_cache_clusters=2,
-            cache_subnet_group_name=cache_subnet_group.ref,
-            security_group_ids=[cache_sg.security_group_id],
-            replication_group_description="DRF API Cache",
-            port=6379,
-            transit_encryption_enabled=False,
-        )
+        # cache_sg = ec2.SecurityGroup(
+        #     self,
+        #     "CacheSecurityGroup",
+        #     vpc=config["shared"].vpc,
+        #     allow_all_outbound=True,
+        #     description="Security group for cache",
+        # )
+        # cache_sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(6379))
+        # cache_subnet_group = elasticache.CfnSubnetGroup(
+        #     self,
+        #     "CacheSubnetGroup",
+        #     subnet_ids=[s.subnet_id for s in config["shared"].vpc.public_subnets],
+        #     description="Subnet group for cache",
+        # )
+        # cache = elasticache.CfnReplicationGroup(
+        #     self,
+        #     "CacheCluster",
+        #     engine="valkey",
+        #     cache_node_type="cache.t4g.micro",
+        #     num_cache_clusters=2,
+        #     cache_subnet_group_name=cache_subnet_group.ref,
+        #     security_group_ids=[cache_sg.security_group_id],
+        #     replication_group_description="DRF API Cache",
+        #     port=6379,
+        #     transit_encryption_enabled=False,
+        # )
+        # REDIS_ENDPOINT={cache.attr_primary_end_point_address}
         user_data = ec2.UserData.for_linux()
         user_data.add_commands(
             "sudo yum update -y",
@@ -129,7 +130,6 @@ GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
 DJANGO_SETTINGS_MODULE=main.settings.aws
 MEDIA_STORAGE_BUCKET_NAME={media_storage.bucket_name}
 STATIC_STORAGE_BUCKET_NAME={static_storage.bucket_name}
-REDIS_ENDPOINT={cache.attr_primary_end_point_address}
 {
                 "\n".join(
                     [
@@ -215,5 +215,5 @@ EOF
 
         CfnOutput(self, "AutoScalingGroupName", value=asg.auto_scaling_group_name)
         CfnOutput(self, "LoadBalancerDnsName", value=lb.load_balancer_dns_name)
-        CfnOutput(self, "RedisEndpoint", value=cache.attr_primary_end_point_address)
-        CfnOutput(self, "RedisPort", value=cache.attr_primary_end_point_port)
+        # CfnOutput(self, "RedisEndpoint", value=cache.attr_primary_end_point_address)
+        # CfnOutput(self, "RedisPort", value=cache.attr_primary_end_point_port)

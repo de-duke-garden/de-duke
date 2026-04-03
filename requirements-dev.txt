@@ -1,0 +1,3 @@
+-r requirements.txt
+-r de_duke/apis/drf/backend/requirements.txt
+types-boto3[full,boto3]
