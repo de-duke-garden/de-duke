@@ -37,7 +37,7 @@ export default function FeatureSection() {
                             <div className="h-32 w-full bg-gray-200 rounded-lg mb-3 relative overflow-hidden">
                                 <Image src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=1000&auto=format&fit=crop" alt="House" fill className="object-cover" />
                             </div>
-                            <div className="font-bold text-lg text-gray-900">$695,000</div>
+                            <div className="font-bold text-lg text-gray-900">₦5,500,000</div>
                             <div className="text-xs text-gray-500 flex space-x-2 mt-1">
                                 <span>4 bd</span><span>|</span><span>3 ba</span><span>|</span><span>3,102 sqft</span>
                             </div>
@@ -53,12 +53,12 @@ export default function FeatureSection() {
                             <Image src="https://illustrations.popsy.co/amber/home-office.svg" alt="Buy a home" width={100} height={100} />
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-3">Buy a home</h3>
-                        <p className="text-gray-600 text-sm mb-8 leading-relaxed">
+                        <p className="text-gray-600 text-sm leading-relaxed">
                             Find your perfect property from verified listings. Explore homes that match your style, budget, and location preferences—all in one place.
                         </p>
-                        <button className="mt-auto px-6 py-2 border border-green-500 text-green-600 font-medium rounded-md hover:bg-green-50 transition-colors">
+                        {/* <button className="mt-auto px-6 py-2 border border-green-500 text-green-600 font-medium rounded-md hover:bg-green-50 transition-colors">
                             Find a local agent
-                        </button>
+                        </button> */}
                     </div>
 
                     {/* Sell Card */}
@@ -67,12 +67,12 @@ export default function FeatureSection() {
                             <Image src="https://illustrations.popsy.co/amber/work-from-home.svg" alt="Sell a home" width={100} height={100} />
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-3">Sell a home</h3>
-                        <p className="text-gray-600 text-sm mb-8 leading-relaxed">
+                        <p className="text-gray-600 text-sm leading-relaxed">
                             List your property with confidence. Reach serious buyers faster through a trusted platform built to showcase your home’s full potential.
                         </p>
-                        <button className="mt-auto px-6 py-2 border border-green-500 text-green-600 font-medium rounded-md hover:bg-green-50 transition-colors">
+                        {/* <button className="mt-auto px-6 py-2 border border-green-500 text-green-600 font-medium rounded-md hover:bg-green-50 transition-colors">
                             See your options
-                        </button>
+                        </button> */}
                     </div>
 
                     {/* Rent Card */}
@@ -81,12 +81,12 @@ export default function FeatureSection() {
                             <Image src="https://illustrations.popsy.co/amber/digital-nomad.svg" alt="Rent a home" width={100} height={100} />
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-3">Rent a home</h3>
-                        <p className="text-gray-600 text-sm mb-8 leading-relaxed">
+                        <p className="text-gray-600 text-sm leading-relaxed">
                             Discover rental options that fit your lifestyle and budget. Browse listings, connect with landlords, and schedule viewings seamlessly.
                         </p>
-                        <button className="mt-auto px-6 py-2 border border-green-500 text-green-600 font-medium rounded-md hover:bg-green-50 transition-colors">
+                        {/* <button className="mt-auto px-6 py-2 border border-green-500 text-green-600 font-medium rounded-md hover:bg-green-50 transition-colors">
                             Find rentals
-                        </button>
+                        </button> */}
                     </div>
 
                 </div>
