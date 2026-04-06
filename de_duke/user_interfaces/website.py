@@ -57,79 +57,87 @@ class Website(Construct):
         website_domain_name = config["shared"].domain_name
 
         # Create S3 bucket for hosting the website page
-        website_bucket = s3.Bucket(
-            self, "WebsiteBucket",
-            removal_policy=RemovalPolicy.DESTROY,
-            auto_delete_objects=True,
-        )
+        # website_bucket = s3.Bucket(
+        #     self, "WebsiteBucket",
+        #     removal_policy=RemovalPolicy.DESTROY,
+        #     auto_delete_objects=True,
+        # )
 
-        project_path = str(Path(__file__).parent.joinpath("website").resolve())
+        # project_path = str(Path(__file__).parent.joinpath("website").resolve())
 
-        # Create CloudFront distribution for the S3 bucket
-        distribution = cloudfront.Distribution(
-            self, "WebsiteDistribution",
-            default_behavior=cloudfront.BehaviorOptions(
-                origin=cloudfront_origins.S3BucketOrigin.with_origin_access_control(
-                    website_bucket),
-                viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                cache_policy=cloudfront.CachePolicy.CACHING_OPTIMIZED
-            ),
-            default_root_object="index.html",
-            error_responses=[
-                cloudfront.ErrorResponse(
-                    http_status=403,
-                    response_http_status=200,
-                    response_page_path="/index.html",
-                    ttl=Duration.minutes(30)
-                ),
-                cloudfront.ErrorResponse(
-                    http_status=404,
-                    response_http_status=200,
-                    response_page_path="/404.html",
-                    ttl=Duration.minutes(30)
-                )
-            ],
-            comment="CloudFront distribution for De-Duke website page",
-            domain_names=[website_domain_name],
-            certificate=config["shared"].certificate,
-        )
+        # # Create CloudFront distribution for the S3 bucket
+        # distribution = cloudfront.Distribution(
+        #     self, "WebsiteDistribution",
+        #     default_behavior=cloudfront.BehaviorOptions(
+        #         origin=cloudfront_origins.S3BucketOrigin.with_origin_access_control(
+        #             website_bucket),
+        #         viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        #         cache_policy=cloudfront.CachePolicy.CACHING_OPTIMIZED
+        #     ),
+        #     default_root_object="index.html",
+        #     error_responses=[
+        #         cloudfront.ErrorResponse(
+        #             http_status=403,
+        #             response_http_status=200,
+        #             response_page_path="/index.html",
+        #             ttl=Duration.minutes(30)
+        #         ),
+        #         cloudfront.ErrorResponse(
+        #             http_status=404,
+        #             response_http_status=200,
+        #             response_page_path="/404.html",
+        #             ttl=Duration.minutes(30)
+        #         )
+        #     ],
+        #     comment="CloudFront distribution for De-Duke website page",
+        #     domain_names=[website_domain_name],
+        #     certificate=config["shared"].certificate,
+        # )
 
-        # Deploy static files to the S3 bucket
-        s3_deploy.BucketDeployment(
-            self, "DeployUserInterface",
-            sources=[
-                s3_deploy.Source.asset(
-                    path=project_path,
-                    bundling=BundlingOptions(
-                        image=_lambda.Runtime.NODEJS_LATEST.bundling_image,
-                        command=[
-                            "bash", "-c",
-                            "npm install && npm run build && cp -r out/* /asset-output/"
-                        ],
-                        # Pass an instance of your custom class here
-                        local=MyLocalBundler(project_path)
-                    ),
-                    exclude=["**/node_modules/**", "**/.next/**", "**/out/**"],
-                ),
-            ],
-            destination_bucket=website_bucket,
-            distribution=distribution,
-            distribution_paths=["/*"],
-        )
+        # # Deploy static files to the S3 bucket
+        # s3_deploy.BucketDeployment(
+        #     self, "DeployUserInterface",
+        #     sources=[
+        #         s3_deploy.Source.asset(
+        #             path=project_path,
+        #             bundling=BundlingOptions(
+        #                 image=_lambda.Runtime.NODEJS_LATEST.bundling_image,
+        #                 command=[
+        #                     "bash", "-c",
+        #                     "npm install && npm run build && cp -r out/* /asset-output/"
+        #                 ],
+        #                 # Pass an instance of your custom class here
+        #                 local=MyLocalBundler(project_path)
+        #             ),
+        #             exclude=["**/node_modules/**", "**/.next/**", "**/out/**"],
+        #         ),
+        #     ],
+        #     destination_bucket=website_bucket,
+        #     distribution=distribution,
+        #     distribution_paths=["/*"],
+        # )
 
+        # route53.ARecord(
+        #     self, "WebsiteARecord",
+        #     zone=config["shared"].hosted_zone,
+        #     record_name=website_domain_name,
+        #     target=route53.RecordTarget.from_alias(
+        #         route53_targets.CloudFrontTarget(distribution)),
+        # )
+        # route53.AaaaRecord(
+        #     self, "WebsiteAaaaRecord",
+        #     zone=config["shared"].hosted_zone,
+        #     record_name=website_domain_name,
+        #     target=route53.RecordTarget.from_alias(
+        #         route53_targets.CloudFrontTarget(distribution)),
+        # )
+        
+        # Handover to Vercel for hosting the Next.js app
         route53.ARecord(
             self, "WebsiteARecord",
             zone=config["shared"].hosted_zone,
             record_name=website_domain_name,
-            target=route53.RecordTarget.from_alias(
-                route53_targets.CloudFrontTarget(distribution)),
-        )
-        route53.AaaaRecord(
-            self, "WebsiteAaaaRecord",
-            zone=config["shared"].hosted_zone,
-            record_name=website_domain_name,
-            target=route53.RecordTarget.from_alias(
-                route53_targets.CloudFrontTarget(distribution)),
+            target=route53.RecordTarget.from_ip_addresses("216.198.79.1"),
         )
 
         # Output the CloudFront distribution domain name

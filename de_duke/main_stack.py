@@ -40,10 +40,10 @@ class MainStack(Stack):
                 "agents": agents,
             }
         )
-        # user_interface = UserInterface(
-        #     self, "UserInterface",
-        #     config={
-        #         "shared": shared,
-        #         "api": api,
-        #     }
-        # )
+        user_interface = UserInterface(
+            self, "UserInterface",
+            config={
+                "shared": shared,
+                "api": api,
+            }
+        )
