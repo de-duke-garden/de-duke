@@ -16,6 +16,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from .models import OTPRequest, HostAccount
 from .serializers import (
+    HostAccountSerializer,
     PhoneNumberSerializer,
     ResetPasswordWithTokenSerializer,
     UserCreateSerializer,
@@ -210,6 +211,8 @@ class UserMeViewSet(viewsets.GenericViewSet):
             return BecomeAHostSurveyorSerializer
         elif self.action == "change_password":
             return ChangeAccountPasswordSerializer
+        elif self.action == "update_host_profile":
+            return HostAccountSerializer
         return UserMeSerializer
 
     @action(methods=["POST"], detail=False, url_path="change-password")
@@ -232,22 +235,35 @@ class UserMeViewSet(viewsets.GenericViewSet):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=["GET"], detail=False, url_path="profile")
+    @action(methods=["GET", "PATCH"], detail=False, url_path="profile")
     def get_profile(self, request: Request, *args, **kwargs):
         """
-        Get the profile of the authenticated user.
+        Get or update the profile of the authenticated user.
         """
         user = request.user
-        serializer = UserMeSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(methods=["PATCH"], detail=False, url_path="update-profile")
-    def update_profile(self, request: Request, *args, **kwargs):
+        if request.method == "GET":
+            serializer = UserMeSerializer(user, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif request.method == "PATCH":
+            serializer = UserMeSerializer(user, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(methods=["PATCH"], detail=False, url_path="profile/host")
+    def update_host_profile(self, request: Request, *args, **kwargs):
         """
-        Update the profile of the authenticated user.
+        Update the host profile of the authenticated user.
         """
         user = request.user
-        serializer = UserMeSerializer(user, data=request.data, partial=True)
+        host_account = user.verified_host_account()
+        if not host_account:
+            return Response(
+                {"detail": "A verified host account not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = HostAccountSerializer(host_account, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
