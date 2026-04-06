@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import (
+    HostAccount,
     HostAccountAgent,
     HostAccountArchitect,
     HostAccountCompany,
@@ -10,6 +11,12 @@ from .models import (
     PhoneNumber,
 )
 
+
+class HostAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostAccount
+        fields = ["id", "host_photo", "bio"]
+        
 
 class UserCreateSerializer(serializers.ModelSerializer):
     """
@@ -61,6 +68,7 @@ class UserMeSerializer(serializers.ModelSerializer):
     host_status_reason = serializers.CharField(
         allow_null=True, allow_blank=True, read_only=True
     )
+    host_account = HostAccountSerializer(required=False, read_only=True, source="verified_host_account")
 
     class Meta:
         model = User
@@ -82,6 +90,7 @@ class UserMeSerializer(serializers.ModelSerializer):
             "email",
             "groups",
             "user_permissions",
+            "host_account",
         ]
 
 
