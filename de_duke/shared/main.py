@@ -32,14 +32,14 @@ class Shared(Construct):
         # - password
         # - tls
         # - from
-        self.email_secret = secretsmanager.Secret.from_secret_name_v2(
-            self, "EmailSecret", secret_name="DeDukeEmail"
-        )
-        # DeDukeGCP (Google Cloud Platform Secret)
-        # - mapApiKey
-        self.gcp_secret = secretsmanager.Secret.from_secret_name_v2(
-            self, "GCPSecret", secret_name="DeDukeGCP"
-        )
+        # self.email_secret = secretsmanager.Secret.from_secret_name_v2(
+        #     self, "EmailSecret", secret_name="DeDukeEmail"
+        # )
+        # # DeDukeGCP (Google Cloud Platform Secret)
+        # # - mapApiKey
+        # self.gcp_secret = secretsmanager.Secret.from_secret_name_v2(
+        #     self, "GCPSecret", secret_name="DeDukeGCP"
+        # )
 
         self.default_env_vars = {
             "LOG_LEVEL": "INFO",
@@ -51,42 +51,42 @@ class Shared(Construct):
             "GCP_SECRET_ARN": self.gcp_secret.secret_arn,
             "AWS_REGION": Aws.REGION,
         }
-        self.removal_policy = RemovalPolicy.DESTROY
-        self.vpc = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)
-        self.vpc.add_gateway_endpoint(
-            "S3GatewayEndpoint", service=ec2.GatewayVpcEndpointAwsService.S3
-        )
-        self.powertools_layer = _lambda.LayerVersion.from_layer_version_arn(
-            self,
-            "PowertoolsLayer",
-            layer_version_arn=f"arn:{Aws.PARTITION}:lambda:{Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:18",
-        )
-        self.common_layer = Layer(
-            self,
-            "CommonLayer",
-            config=LayerConfig(
-                runtime=_lambda.Runtime.PYTHON_3_12,
-                architecture=_lambda.Architecture.X86_64,
-                path=str(Path(__file__).parent.joinpath("layers/common").resolve()),
-                auto_upgrade=True,
-                layer_type="txt",
-            ),
-        ).layer
-        self.internal_layer = Layer(
-            self,
-            "InternalLayer",
-            config=LayerConfig(
-                runtime=_lambda.Runtime.PYTHON_3_12,
-                architecture=_lambda.Architecture.X86_64,
-                path=str(
-                    Path(__file__)
-                    .parent.joinpath("layers/python_sdk/internal")
-                    .resolve()
-                ),
-                auto_upgrade=True,
-                layer_type="toml",
-            ),
-        ).layer
+        # self.removal_policy = RemovalPolicy.DESTROY
+        # self.vpc = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)
+        # self.vpc.add_gateway_endpoint(
+        #     "S3GatewayEndpoint", service=ec2.GatewayVpcEndpointAwsService.S3
+        # )
+        # self.powertools_layer = _lambda.LayerVersion.from_layer_version_arn(
+        #     self,
+        #     "PowertoolsLayer",
+        #     layer_version_arn=f"arn:{Aws.PARTITION}:lambda:{Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:18",
+        # )
+        # self.common_layer = Layer(
+        #     self,
+        #     "CommonLayer",
+        #     config=LayerConfig(
+        #         runtime=_lambda.Runtime.PYTHON_3_12,
+        #         architecture=_lambda.Architecture.X86_64,
+        #         path=str(Path(__file__).parent.joinpath("layers/common").resolve()),
+        #         auto_upgrade=True,
+        #         layer_type="txt",
+        #     ),
+        # ).layer
+        # self.internal_layer = Layer(
+        #     self,
+        #     "InternalLayer",
+        #     config=LayerConfig(
+        #         runtime=_lambda.Runtime.PYTHON_3_12,
+        #         architecture=_lambda.Architecture.X86_64,
+        #         path=str(
+        #             Path(__file__)
+        #             .parent.joinpath("layers/python_sdk/internal")
+        #             .resolve()
+        #         ),
+        #         auto_upgrade=True,
+        #         layer_type="toml",
+        #     ),
+        # ).layer
 
         self.hosted_zone = route53.HostedZone.from_lookup(
             self, "HostedZone", domain_name=self.domain_name
