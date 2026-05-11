@@ -41,16 +41,16 @@ class Shared(Construct):
         #     self, "GCPSecret", secret_name="DeDukeGCP"
         # )
 
-        self.default_env_vars = {
-            "LOG_LEVEL": "INFO",
-            "POWERTOOLS_DEV": "true",
-            "POWERTOOLS_TRACE_DISABLED": "true",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
-            "POWERTOOLS_SERVICE_NAME": f"{Aws.STACK_NAME}-service",
-            "EMAIL_SECRET_ARN": self.email_secret.secret_arn,
-            "GCP_SECRET_ARN": self.gcp_secret.secret_arn,
-            "AWS_REGION": Aws.REGION,
-        }
+        # self.default_env_vars = {
+        #     "LOG_LEVEL": "INFO",
+        #     "POWERTOOLS_DEV": "true",
+        #     "POWERTOOLS_TRACE_DISABLED": "true",
+        #     "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+        #     "POWERTOOLS_SERVICE_NAME": f"{Aws.STACK_NAME}-service",
+        #     "EMAIL_SECRET_ARN": self.email_secret.secret_arn,
+        #     "GCP_SECRET_ARN": self.gcp_secret.secret_arn,
+        #     "AWS_REGION": Aws.REGION,
+        # }
         # self.removal_policy = RemovalPolicy.DESTROY
         # self.vpc = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)
         # self.vpc.add_gateway_endpoint(
