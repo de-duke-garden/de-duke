@@ -36,7 +36,7 @@ export default function Footer() {
                 <div className="flex flex-wrap justify-center gap-6 mb-8 text-sm text-gray-600 font-medium">
                     <Link href="/about" className="hover:text-primary">About</Link>
                     {/* <Link href="#" className="hover:text-primary">Research</Link> */}
-                    <Link href="#" className="hover:text-primary">Help</Link>
+                    {/* <Link href="#" className="hover:text-primary">Help</Link> */}
                     {/* <Link href="#" className="hover:text-primary">Advertise</Link> */}
                     {/* <Link href="#" className="hover:text-primary">Fair Housing Guide</Link> */}
                     {/* <Link href="#" className="hover:text-primary">Advocacy</Link> */}

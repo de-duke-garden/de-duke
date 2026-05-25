@@ -1,3 +1,5 @@
+"use client"
+
 export default function NewsletterCTA() {
     return (
         <div className="bg-white py-16 sm:py-24">
@@ -10,7 +12,7 @@ export default function NewsletterCTA() {
                         <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-300">
                             Get the latest property alerts, market trends, and exclusive offers delivered straight to your inbox.
                         </p>
-                        <div className="mt-10 flex max-w-md gap-x-4 mx-auto">
+                        <form onSubmit={(e: any) => alert("Thank you, We will get in touch with you.")} className="mt-10 flex max-w-md gap-x-4 mx-auto">
                             <label htmlFor="email-address" className="sr-only">
                                 Email address
                             </label>
@@ -29,9 +31,9 @@ export default function NewsletterCTA() {
                             >
                                 Subscribe
                             </button>
-                        </div>
+                        </form>
                         <p className="mt-4 text-xs leading-5 text-gray-400">
-                            We care about your data. Read our <a href="#" className="font-semibold text-white hover:underline">privacy policy</a>.
+                            We care about your data. Read our <a href="/about/privacy-policy" className="font-semibold text-white hover:underline">privacy policy</a>.
                         </p>
                     </div>
                     <svg
