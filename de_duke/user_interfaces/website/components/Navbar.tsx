@@ -63,7 +63,7 @@ export default function Navbar() {
 
                     {/* Right Navigation */}
                     <div className="hidden peer-checked:flex flex-col absolute w-full left-0 z-10 top-full p-2 md:p-0 md:w-fit md:static md:flex md:flex-row md:items-center md:space-x-8 bg-white border-b border-gray-100 md:bg-transparent md:border-b-0">
-                        <Link href="#" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-50 md:px-2 md:py-1 md:text-gray-900 md:hover:text-primary md:text-sm">
+                        {/* <Link href="#" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-50 md:px-2 md:py-1 md:text-gray-900 md:hover:text-primary md:text-sm">
                             Buy
                         </Link>
                         <Link href="#" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-50 md:px-2 md:py-1 md:text-gray-900 md:hover:text-primary md:text-sm">
@@ -71,13 +71,13 @@ export default function Navbar() {
                         </Link>
                         <Link href="#" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-50 md:px-2 md:py-1 md:text-gray-900 md:hover:text-primary md:text-sm">
                             Rent
+                        </Link> */}
+                        <Link href="/about" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-50 md:px-2 md:py-1 md:text-gray-900 md:hover:text-primary md:text-sm">
+                            About
                         </Link>
-                        <Link href="#" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-50 md:px-2 md:py-1 md:text-gray-900 md:hover:text-primary md:text-sm">
-                            Help
-                        </Link>
-                        <button className="block px-3 py-2 w-fit rounded-md text-base font-medium hover:bg-gray-50 md:px-2 md:py-1 md:text-gray-900 md:hover:text-primary md:text-sm underline underline-offset-8 decoration-primary decoration-2">
+                        <Link href="/release/android.apk" className="block px-3 py-2 w-fit rounded-md text-base font-medium hover:bg-gray-50 md:px-2 md:py-1 md:text-gray-900 md:hover:text-primary md:text-sm underline underline-offset-8 decoration-primary decoration-2">
                             Download
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

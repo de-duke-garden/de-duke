@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function FeatureSection() {
     return (
@@ -15,9 +16,9 @@ export default function FeatureSection() {
                         <p className="text-gray-600 mb-6">
                             Download the app for a more personalized experience.
                         </p>
-                        <button className="px-6 py-2 border border-primary text-primary font-semibold rounded-md hover:bg-primary/5 transition-colors">
+                        <Link href="/release/android.apk" className="px-6 py-2 border border-primary text-primary font-semibold rounded-md hover:bg-primary/5 transition-colors">
                             Download App
-                        </button>
+                        </Link>
                     </div>
 
                     {/* Float UI Illustration Placeholder */}
