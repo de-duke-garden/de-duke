@@ -20,30 +20,30 @@ class MainStack(Stack):
             self, "SharedResources",
             config={}
         )
-        # databases = Databases(
-        #     self, "Databases",
-        #     config={
-        #         "shared": shared,
-        #     }
-        # )
-        # agents = Agents(
-        #     self, "Agents",
-        #     config={
-        #         "shared": shared,
-        #     }
-        # )
-        # api = Api(
-        #     self, "Apis",
-        #     config={
-        #         "shared": shared,
-        #         "databases": databases,
-        #         "agents": agents,
-        #     }
-        # )
-        # user_interface = UserInterface(
-        #     self, "UserInterface",
-        #     config={
-        #         "shared": shared,
-        #         "api": api,
-        #     }
-        # )
+        databases = Databases(
+            self, "Databases",
+            config={
+                "shared": shared,
+            }
+        )
+        agents = Agents(
+            self, "Agents",
+            config={
+                "shared": shared,
+            }
+        )
+        api = Api(
+            self, "Apis",
+            config={
+                "shared": shared,
+                "databases": databases,
+                "agents": agents,
+            }
+        )
+        user_interface = UserInterface(
+            self, "UserInterface",
+            config={
+                "shared": shared,
+                "api": api,
+            }
+        )
