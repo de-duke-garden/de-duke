@@ -32,30 +32,30 @@ class Shared(Construct):
         # - password
         # - tls
         # - from
-        # self.email_secret = secretsmanager.Secret.from_secret_name_v2(
-        #     self, "EmailSecret", secret_name="DeDukeEmail"
-        # )
-        # # DeDukeGCP (Google Cloud Platform Secret)
-        # # - mapApiKey
-        # self.gcp_secret = secretsmanager.Secret.from_secret_name_v2(
-        #     self, "GCPSecret", secret_name="DeDukeGCP"
-        # )
+        self.email_secret = secretsmanager.Secret.from_secret_name_v2(
+            self, "EmailSecret", secret_name="DeDukeEmail"
+        )
+        # DeDukeGCP (Google Cloud Platform Secret)
+        # - mapApiKey
+        self.gcp_secret = secretsmanager.Secret.from_secret_name_v2(
+            self, "GCPSecret", secret_name="DeDukeGCP"
+        )
 
-        # self.default_env_vars = {
-        #     "LOG_LEVEL": "INFO",
-        #     "POWERTOOLS_DEV": "true",
-        #     "POWERTOOLS_TRACE_DISABLED": "true",
-        #     "POWERTOOLS_LOGGER_LOG_EVENT": "true",
-        #     "POWERTOOLS_SERVICE_NAME": f"{Aws.STACK_NAME}-service",
-        #     "EMAIL_SECRET_ARN": self.email_secret.secret_arn,
-        #     "GCP_SECRET_ARN": self.gcp_secret.secret_arn,
-        #     "AWS_REGION": Aws.REGION,
-        # }
-        # self.removal_policy = RemovalPolicy.DESTROY
-        # self.vpc = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)
-        # self.vpc.add_gateway_endpoint(
-        #     "S3GatewayEndpoint", service=ec2.GatewayVpcEndpointAwsService.S3
-        # )
+        self.default_env_vars = {
+            "LOG_LEVEL": "INFO",
+            "POWERTOOLS_DEV": "true",
+            "POWERTOOLS_TRACE_DISABLED": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_SERVICE_NAME": f"{Aws.STACK_NAME}-service",
+            "EMAIL_SECRET_ARN": self.email_secret.secret_arn,
+            "GCP_SECRET_ARN": self.gcp_secret.secret_arn,
+            "AWS_REGION": Aws.REGION,
+        }
+        self.removal_policy = RemovalPolicy.DESTROY
+        self.vpc = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)
+        self.vpc.add_gateway_endpoint(
+            "S3GatewayEndpoint", service=ec2.GatewayVpcEndpointAwsService.S3
+        )
         # self.powertools_layer = _lambda.LayerVersion.from_layer_version_arn(
         #     self,
         #     "PowertoolsLayer",
