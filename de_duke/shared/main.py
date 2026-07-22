@@ -51,11 +51,11 @@ class Shared(Construct):
             "GCP_SECRET_ARN": self.gcp_secret.secret_arn,
             "AWS_REGION": Aws.REGION,
         }
-        self.removal_policy = RemovalPolicy.DESTROY
-        self.vpc = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)
-        self.vpc.add_gateway_endpoint(
-            "S3GatewayEndpoint", service=ec2.GatewayVpcEndpointAwsService.S3
-        )
+        # self.removal_policy = RemovalPolicy.DESTROY
+        # self.vpc = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)
+        # self.vpc.add_gateway_endpoint(
+        #     "S3GatewayEndpoint", service=ec2.GatewayVpcEndpointAwsService.S3
+        # )
         # self.powertools_layer = _lambda.LayerVersion.from_layer_version_arn(
         #     self,
         #     "PowertoolsLayer",
